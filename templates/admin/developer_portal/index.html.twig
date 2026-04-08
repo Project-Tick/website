@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Developer Portal{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1>Developer Portal <span class="admin-breadcrumb">/ Management</span></h1>
+            <p style="color: #666; margin-top: 8px;">Edit technical documentation and API guides shown on the public Developer Portal.</p>
+        </div>
+        <a href="{{ path('app_admin_developer_portal_new') }}" class="btn btn-primary">+ Add New Page</a>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--pt-gray-100); text-align: left;">
+                    <th style="padding: 16px;">Title</th>
+                    <th style="padding: 16px;">Slug</th>
+                    <th style="padding: 16px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px; font-weight: 600;">{{ entry.title }}</td>
+                    <td style="padding: 16px; font-family: monospace; color: #666;">{{ entry.slug }}</td>
+                    <td style="padding: 16px; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                        <a href="{{ path('app_admin_developer_portal_edit', {'id': entry.id}) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">Edit</a>
+                        <form method="post" action="{{ path('app_admin_developer_portal_delete', {'id': entry.id}) }}" onsubmit="return confirm('Are you sure you want to delete this developer guide?');" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
+                            <button class="btn btn-primary" style="background: var(--pt-red); border: none; padding: 6px 12px; font-size: 0.85rem;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="padding: 40px; text-align: center; color: #888;">
+                        No developer pages found. Start by creating your first technical guide.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 32px;">
+        <a href="{{ path('app_admin_dashboard') }}" style="color: #666; text-decoration: none;">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

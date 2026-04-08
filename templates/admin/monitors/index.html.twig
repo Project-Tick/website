@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Monitors | Project Tick{% endblock %}
+
+{% block body %}
+<div class="py-5" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+        <div>
+            <h1 style="font-family: var(--font-display); font-weight: 900;">Manage <span style="color:#EE0000">Monitors</span></h1>
+            <p style="color: var(--text-secondary);">Oversee and configure the Project Tick health checks.</p>
+        </div>
+        <a href="{{ path('admin_monitors_new') }}" class="btn btn-primary" style="padding: 12px 30px; font-weight: 800;">+ ADD MONITOR</a>
+    </div>
+    
+    <div class="table-container" style="background: var(--bg-card); border-radius: 20px; border: 1px solid var(--pt-gray-100); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+        <table class="table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--pt-gray-50); border-bottom: 1px solid var(--pt-gray-100);">
+                    <th style="padding: 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">Status</th>
+                    <th style="padding: 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">Monitor Name</th>
+                    <th style="padding: 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">Type</th>
+                    <th style="padding: 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">Target</th>
+                    <th style="padding: 20px; text-align: right; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for monitor in monitors %}
+                <tr style="border-bottom: 1px solid var(--pt-gray-50); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 20px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: {% if monitor.active %}#00C853{% else %}#ccc{% endif %}; box-shadow: 0 0 8px {% if monitor.active %}#00C853{% else %}#ccc{% endif %};"></div>
+                            <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">{% if monitor.active %}Active{% else %}Paused{% endif %}</span>
+                        </div>
+                    </td>
+                    <td style="padding: 20px; font-weight: 800; font-family: var(--font-display);">{{ monitor.name }}</td>
+                    <td style="padding: 20px;">
+                        <span style="background: var(--pt-gray-100); padding: 4px 10px; font-size: 0.75rem; font-weight: 900; border-radius: 4px; text-transform: uppercase;">{{ monitor.type }}</span>
+                    </td>
+                    <td style="padding: 20px; color: var(--text-secondary); font-family: monospace; font-size: 0.85rem;">{{ monitor.url|default('-') }}</td>
+                    <td style="padding: 20px; text-align: right;">
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <form method="post" action="{{ path('admin_monitors_delete', {id: monitor.id}) }}" onsubmit="return confirm('Are you sure you want to delete this monitor? This will also wipe its history.');" style="display: inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_monitor' ~ monitor.id) }}">
+                                <button class="btn btn-secondary" style="padding: 6px 15px; font-size: 0.75rem; background: transparent; border: 1px solid var(--pt-red); color: var(--pt-red);">DELETE</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="padding: 60px; text-align: center; color: var(--text-secondary);">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🛡️</div>
+                        No monitors configured yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 40px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary" style="background: transparent; border: 1px solid var(--pt-gray-200);">&larr; Dashboard</a>
+        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+            Engine: <strong>Project Tick Monitor v1.0 (Direct DB)</strong>
+        </div>
+    </div>
+</div>
+{% endblock %}

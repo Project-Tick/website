@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Server Error (500) - Project Tick{% endblock %}
+
+{% block body %}
+<div style="background: var(--pt-black-900); min-height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding: 40px; border-top: 4px solid var(--pt-red);">
+    <div style="max-width: 600px;">
+        <div style="display: inline-block; padding: 12px 24px; border: 2px solid var(--pt-red); font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; margin-bottom: 32px; background: rgba(238, 0, 0, 0.05); clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);">
+            ERROR 500
+        </div>
+        
+        <h1 style="font-family: var(--font-display); font-size: 3.5rem; margin-bottom: 16px; letter-spacing: -1px;">Systems Integrity Failure</h1>
+        
+        <p style="color: var(--pt-gray-300); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+            A critical server error has occurred. Our automated diagnostics system has been notified and our technicians are investigating the breach in service.
+        </p>
+
+        <div style="display: flex; gap: 16px; justify-content: center;">
+            <a href="{{ path('app_home') }}" class="btn btn-primary" style="padding: 14px 40px;">Return to Hub</a>
+            <a href="https://discord.gg/projecttick" target="_blank" class="btn btn-secondary" style="border-color: #444; color: white;">Get Support</a>
+        </div>
+
+        <div style="margin-top: 60px; font-size: 0.8rem; color: #444; font-family: monospace; letter-spacing: 1px;">
+            NODE: 193.164.4.214 // PROTOCOL: FAILSAFE_TRIGGERED
+        </div>
+    </div>
+</div>
+{% endblock %}

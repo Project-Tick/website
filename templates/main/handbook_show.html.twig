@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ entry.title }} - {{ site_setting('nav_handbook_label', 'Handbook') }}{% endblock %}
+
+{% macro render_tree(tree, current_slug) %}
+    <ul class="nav-tree">
+        {% for key, node in tree %}
+            <li class="nav-item">
+                <div class="nav-link-wrapper">
+                    {% if node._entry %}
+                        <a href="{{ path('app_handbook_show', {'slug': node._entry.slug}) }}" class="nav-link {% if current_slug == node._entry.slug %}active{% endif %}">
+                            {{ node._entry.title }}
+                        </a>
+                    {% else %}
+                        <span class="nav-folder">{{ key|capitalize }}</span>
+                    {% endif %}
+                </div>
+                {% if node._children is not empty %}
+                    {{ _self.render_tree(node._children, current_slug) }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block body %}
+<div class="container">
+    <div style="display: flex; gap: 40px; align-items: flex-start;">
+        <!-- Sidebar Navigation -->
+        <aside style="width: 280px; flex-shrink: 0; background: var(--pt-gray-10); padding: 20px; border-right: 1px solid var(--pt-gray-200); position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto;">
+            <h4 style="margin-top: 0; color: var(--pt-gray-600); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; border-bottom: 2px solid var(--pt-red); padding-bottom: 10px; margin-bottom: 20px;">{{ site_setting('handbook_side_header', 'Documentation') }}</h4>
+            {{ _self.render_tree(tree, entry.slug) }}
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--pt-gray-200);">
+                <a href="{{ path('app_handbook') }}" style="color: var(--pt-red); text-decoration: none; font-weight: bold; font-size: 0.9rem;">&larr; {{ site_setting('handbook_back_link', 'Main Index') }}</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <article style="flex-grow: 1; max-width: 900px;">
+            <div style="margin-bottom: 30px;">
+                <nav style="font-size: 0.85rem; color: var(--pt-gray-600); margin-bottom: 10px;">
+                    <a href="{{ path('app_handbook') }}" style="color: inherit; text-decoration: none;">{{ site_setting('nav_handbook_label', 'Handbook') }}</a> / 
+                    {% set slug_parts = entry.slug|split('/') %}
+                    {% for part in slug_parts %}
+                        {{ part|capitalize }}{% if not loop.last %} / {% endif %}
+                    {% endfor %}
+                </nav>
+                <h1 style="border-bottom: 1px solid var(--pt-gray-200); padding-bottom: 20px; margin-bottom: 0;">{{ entry.title }}</h1>
+            </div>
+
+            <div class="prose" style="line-height: 1.8; color: var(--pt-black);">
+                {{ entry.content|convert_markdown_links|markdown_to_html|raw }}
+            </div>
+
+            <!-- Feedback Section -->
+            <div style="margin-top: 60px; padding: 32px; background: var(--pt-gray-100); border-radius: 8px; text-align: center;">
+                <h4 style="margin-bottom: 16px;">Was this handbook page helpful?</h4>
+                <div style="display: flex; justify-content: center; gap: 16px;">
+                    <form action="{{ path('app_handbook_feedback', {id: entry.id}) }}" method="POST">
+                        <input type="hidden" name="helpful" value="1">
+                        <button type="submit" class="btn" style="background: white; border: 1px solid #ddd; padding: 8px 24px; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                            Yes
+                        </button>
+                    </form>
+                    <form action="{{ path('app_handbook_feedback', {id: entry.id}) }}" method="POST">
+                        <input type="hidden" name="helpful" value="0">
+                        <button type="submit" class="btn" style="background: white; border: 1px solid #ddd; padding: 8px 24px; border-radius: 4px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                            No
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--pt-gray-200); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.85rem; color: var(--pt-gray-500);">{{ site_setting('handbook_last_updated', 'Last updated') }}: {{ "now"|date("F j, Y") }}</span>
+            </div>
+        </article>
+    </div>
+</div>
+
+{% endblock %}

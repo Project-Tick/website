@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}License Comparisons - Admin{% endblock %}
+
+{% block body %}
+    <h1>License Comparison Table</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{{ path('app_admin_dashboard') }}">&larr; Dashboard</a>
+        <a href="{{ path('app_admin_license_comparison_new') }}" class="btn btn-primary" style="margin-left: 20px;">+ New Comparison Field</a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Feature</th>
+                <th>MIT/Apache</th>
+                <th>GNU GPL</th>
+                <th>Project Tick</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in comparisons %}
+            <tr>
+                <td>{{ item.displayOrder }}</td>
+                <td><strong>{{ item.feature }}</strong></td>
+                <td>{{ item.mitApache }}</td>
+                <td>{{ item.gnuGpl }}</td>
+                <td>{{ item.projectTick }}</td>
+                <td>
+                    <a href="{{ path('app_admin_license_comparison_edit', {'id': item.id}) }}">Edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">No records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

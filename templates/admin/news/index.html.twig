@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage News{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header reveal-up">
+        <h1>News & Updates <span class="admin-breadcrumb">/ Management</span></h1>
+        <a href="{{ path('app_admin_news_new') }}" class="btn btn-primary">+ Create New Post</a>
+    </div>
+    
+    <div class="admin-table-container reveal-up">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Publication Date</th>
+                    <th>Title & Context</th>
+                    <th>Target Product</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in news %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 700; color: var(--pt-black);">{{ post.date|date('M d, Y') }}</div>
+                        <code style="font-size: 0.75rem; color: var(--pt-gray-500);">{{ post.slug }}</code>
+                    </td>
+                    <td style="font-weight: 700; color: var(--pt-black); font-size: 1.1rem;">{{ post.title }}</td>
+                    <td>
+                        <span class="status-pill" style="background: var(--pt-gray-100); color: var(--pt-gray-600); border: 1px solid var(--pt-gray-200);">
+                            {{ post.product ? post.product.title : 'General' }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <a href="{{ path('app_admin_news_edit', {id: post.id}) }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.8rem;">Edit</a>
+                            {% if post.product %}
+                                <a href="{{ path('app_product_news_show', {slug: post.product.slug, newsSlug: post.slug}) }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.8rem; background: transparent; border-color: var(--pt-gray-300); color: var(--pt-gray-600);">Preview</a>
+                            {% else %}
+                                <a href="{{ path('app_project_news_show', {slug: post.slug}) }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.8rem; background: transparent; border-color: var(--pt-gray-300); color: var(--pt-gray-600);">Preview</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 80px; color: var(--pt-gray-400);">
+                        <i class="fas fa-newspaper" style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.3;"></i>
+                        No news posts found in the database.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-5 reveal-up">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary" style="border: none; background: transparent; padding-left: 0;">
+            &larr; Return to Overview
+        </a>
+    </div>
+</div>
+{% endblock %}

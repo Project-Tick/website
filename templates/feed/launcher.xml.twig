@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>ProjT Launcher</title>
+    <subtitle>An Open Source Minecraft launcher with the ability to manage multiple instances, accounts and mods. Focused on user freedom and free redistributability.</subtitle>
+    <link href="{{ url('app_feed_launcher') }}" rel="self"/>
+    <link href="{{ url('app_launcher') }}"/>
+    <updated>{{ news|length > 0 ? news[0].date|date('c') : "now"|date('c') }}</updated>
+    <id>{{ url('app_launcher') }}</id>
+    <author>
+        <name>YongDo-Hyun</name>
+        <email>froster12@naver.com</email>
+    </author>
+    {% for post in news %}
+    <entry>
+        <title>{{ post.title|escape('html') }}</title>
+        <link href="{{ url('app_news_show', {'slug': post.slug}) }}"/>
+        <updated>{{ post.date|date('c') }}</updated>
+        <id>{{ url('app_news_show', {'slug': post.slug}) }}</id>
+        <content type="html"><![CDATA[{{ post.content|markdown_to_html|html_to_absolute_urls|raw }}]]></content>
+    </entry>
+    {% endfor %}
+</feed>

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Software & Services - Project Tick Ecosystem{% endblock %}
+
+{% block body %}
+<div class="hero" style="padding: 100px 0; background: var(--pt-black-900); text-align: center; color: white;">
+    <div class="container">
+        <h1 style="font-size: 3.5rem; margin-bottom: 24px;">Ecosystem Products</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 800px; margin: 0 auto;">Discover professional-grade software and infrastructure maintained by the Project Tick community.</p>
+    </div>
+</div>
+
+<div class="container" style="padding: 80px 0;">
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 32px;">
+        {% for product in products %}
+            <div class="card product-card" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; border: 1px solid var(--border-color); background: var(--pt-gray-100);">
+                {% if product.imageUrl %}
+                    <div style="height: 200px; overflow: hidden; background: #000;">
+                        <img src="{{ product.imageUrl }}" alt="{{ product.title }}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+                    </div>
+                {% else %}
+                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #080808; color: var(--pt-red);">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                    </div>
+                {% endif %}
+                
+                <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <h2 style="margin: 0; font-size: 1.5rem; color: var(--text-primary);">{{ product.title }}</h2>
+                        <span class="badge" style="background: var(--pt-red); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">{{ product.productType }}</span>
+                    </div>
+                    
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; flex: 1;">{{ product.summary }}</p>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: auto;">
+                        <a href="{{ path('app_product_show', {slug: product.slug}) }}" class="btn btn-primary" style="flex: 1; text-align: center;">Explore</a>
+                        {% if product.githubUrl %}
+                            <a href="{{ product.githubUrl }}" target="_blank" class="btn btn-secondary" style="padding: 10px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                <h3 style="color: #888;">No products found in the ecosystem.</h3>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+    body.dark-theme .product-card { background: #111; border-color: #222; }
+</style>
+{% endblock %}

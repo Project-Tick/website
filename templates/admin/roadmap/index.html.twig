@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Roadmap{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <h1>Roadmap Items</h1>
+        <a href="{{ path('app_admin_roadmap_new') }}" class="btn btn-primary" style="padding: 10px 24px;">+ Create New Item</a>
+    </div>
+
+    <div class="card p-0" style="overflow: hidden;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Title</th>
+                    <th>Created At</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td style="width: 80px; font-weight: bold;">#{{ item.priority }}</td>
+                    <td style="width: 150px;">
+                        {% set status_class = 'badge-status-active' %}
+                        {% if item.status == 'planned' %}{% set status_class = 'badge-status-warn' %}{% endif %}
+                        {% if item.status == 'completed' %}{% set status_class = 'badge-status-danger' %}{% endif %} {# reuse danger color for completed if needed, or define badge-status-success #}
+                        
+                        <span class="badge {{ status_class }}" style="text-transform: capitalize;">
+                            {{ item.status|replace({'-': ' '}) }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="display: block;">{{ item.title }}</strong>
+                        <span style="font-size: 0.85rem; color: #666;">{{ item.description|slice(0, 100) }}...</span>
+                    </td>
+                    <td style="font-size: 0.85rem; color: #666;">{{ item.createdAt|date('Y-m-d') }}</td>
+                    <td style="text-align: right;">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <a href="{{ path('app_admin_roadmap_edit', {id: item.id}) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
+                            <form method="post" action="{{ path('app_admin_roadmap_delete', {id: item.id}) }}" style="display:inline;" onsubmit="return confirm('Silmek istediğine emin misin?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.8rem; color: red;">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 48px; color: #888;">No roadmap items found. Start by creating one!</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

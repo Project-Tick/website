@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Licenses - Project Tick{% endblock %}
+
+{% block body %}
+    <h1>My Licenses & Agreements</h1>
+    <p class="lead">Manage your software licenses and contributor agreements.</p>
+
+    <div class="grid" style="margin-top: 40px; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+        {% for license in user_licenses %}
+            <div class="card" style="padding: 24px; border-top: 4px solid var(--primary-color);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem;">{{ license.license.name }}</h3>
+                        <p style="margin: 4px 0; color: var(--text-secondary); font-size: 0.9rem;">{{ license.license.spdxIdentifier }}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <p style="margin: 4px 0;"><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
+                    <p style="margin: 4px 0;"><strong>Signed:</strong> {{ license.signedAt|date('d M Y') }}</p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <a href="{{ path('app_license_view', {slug: license.license.slug}) }}" class="btn btn-sm btn-outline-primary">Terms</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

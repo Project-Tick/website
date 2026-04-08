@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}App Showcase - Built with Project Tick{% endblock %}
+
+{% block body %}
+<div class="hero" style="padding: 100px 0; background: var(--pt-black-900); text-align: center; color: white;">
+    <div class="container">
+        <h1 style="font-size: 3.5rem; margin-bottom: 24px;">Community Showcase</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 800px; margin: 0 auto;">Projects and applications powered by the Project Tick ecosystem.</p>
+    </div>
+</div>
+
+<div class="container" style="padding: 80px 0;">
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px;">
+        {% for app in apps %}
+            <div class="card showcase-card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s ease;">
+                <div style="height: 200px; background: #eee; overflow: hidden;">
+                    {% if app.imageUrl %}
+                        <img src="{{ app.imageUrl }}" alt="{{ app.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--pt-gray-100); color: #ccc;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                        </div>
+                    {% endif %}
+                </div>
+                <div style="padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <h3 style="margin: 0; font-size: 1.4rem;">{{ app.name }}</h3>
+                        {% if app.isFeatured %}
+                            <span class="badge" style="background: var(--pt-red); color: white; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px;">FEATURED</span>
+                        {% endif %}
+                    </div>
+                    <p style="color: var(--pt-red); font-weight: 600; font-size: 0.9rem; margin-bottom: 12px;">by {{ app.developer }}</p>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; height: 3em; overflow: hidden;">{{ app.shortDescription }}</p>
+                    <a href="{{ app.websiteUrl }}" target="_blank" class="btn btn-secondary" style="margin-top: 20px; display: block; text-align: center; border: 1px solid var(--border-color);">Visit Website</a>
+                </div>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                <h3 style="color: #888;">No apps showcased yet.</h3>
+                <p>Are you building with Project Tick? <a href="{{ path('app_contact') }}" style="color: var(--pt-red);">Tell us about it!</a></p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .showcase-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+    body.dark-theme .showcase-card { background: #111; border-color: #222; }
+</style>
+{% endblock %}

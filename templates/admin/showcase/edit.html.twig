@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Showcase - {{ showcaseApp.id ? 'Edit' : 'New' }} App{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="margin-bottom: 32px;">
+        <h1>{{ showcaseApp.id ? 'Edit Showcase Entry' : 'New Showcase Entry' }}</h1>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.developer) }}
+                {{ form_widget(form.developer) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.websiteUrl) }}
+                {{ form_widget(form.websiteUrl) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.imageUrl) }}
+                {{ form_widget(form.imageUrl) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.shortDescription) }}
+                {{ form_widget(form.shortDescription) }}
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                {{ form_widget(form.isFeatured) }}
+                {{ form_label(form.isFeatured) }}
+            </div>
+            
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary">{{ showcaseApp.id ? 'Save Changes' : 'Add App' }}</button>
+                <a href="{{ path('app_admin_showcase') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

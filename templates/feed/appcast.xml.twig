@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>{{ product.title|default('Project Tick') }}</title>
+    <link>{{ url('app_product_feed_appcast', {slug: product.slug|default('projt-launcher')}) }}</link>
+    <language>en</language>
+    {% for post in news %}
+    {% set meta = post.metadata %}
+    {% if meta.release_version is defined %}
+        {% set github_base = product.githubUrl|default('https://github.com/Project-Tick/' ~ (product.title|default('ProjT Launcher')|replace({' ': '-'}))) %}
+        {% if github_base ends with '/' %}{% set github_base = github_base[:-1] %}{% endif %}
+        {% set binary_prefix = meta.binary_prefix|default(product.title|default('ProjTLauncher')|replace({' ': ''})) %}
+
+        {% if meta.macos_signature is defined %}
+      <item>
+        <title>{{ post.title|escape('html') }} (macOS)</title>
+        <link>{{ url('app_news_show', {'slug': post.slug}) }}</link>
+        {% set rel = meta.release_version|trim('.') %}
+        {% set sparkle_version = rel|replace({'-':'.'}) %}
+        <sparkle:version>{{ sparkle_version }}</sparkle:version>
+        <sparkle:shortVersionString>{{ rel }}</sparkle:shortVersionString>
+        {% if '-' in rel %}
+          {% set line = rel|split('-')[0] %}
+        {% else %}
+          {% set parts = rel|split('.') %}
+          {% set line = parts[0] ~ '.' ~ parts[1] ~ '.' ~ parts[2] %}
+        {% endif %}
+        <sparkle:channel>{{ line }}</sparkle:channel>
+        <description><![CDATA[{{ post.content|markdown_to_html|html_to_absolute_urls|raw }}]]></description>
+        <pubDate>{{ post.date|date('Y-m-d\\TH:i:sP') }}</pubDate>
+        {% if meta.minimum_macos_version is defined %}<sparkle:minimumSystemVersion>{{ meta.minimum_macos_version }}</sparkle:minimumSystemVersion>{% endif %}
+        {% if meta.critical_update is defined %}<sparkle:criticalUpdate></sparkle:criticalUpdate>{% endif %}
+        {% if meta.minimum_autoupdate_version is defined %}<sparkle:minimumAutoupdateVersion>{{ meta.minimum_autoupdate_version }}</sparkle:minimumAutoupdateVersion>{% endif %}
+        {% if meta.phased_rollout_interval is defined %}<sparkle:phasedRolloutInterval>{{ meta.phased_rollout_interval }}</sparkle:phasedRolloutInterval>{% endif %}
+        <enclosure sparkle:os="macos"
+            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-macOS-{{ meta.release_version }}.{{ meta.macos_file_extension|default('zip') }}"
+            length="0"
+            type="application/octet-stream"
+            sparkle:edSignature="{{ meta.macos_signature }}"/>
+      </item>
+        {% endif %}
+
+        {% if meta.win32_signature is defined or meta.win64_signature is defined %}
+      <item>
+        <title>{{ post.title|escape('html') }} (Windows)</title>
+        <link>{{ url('app_news_show', {'slug': post.slug}) }}</link>
+        {% set rel = meta.release_version|trim('.') %}
+        {% set sparkle_version = rel|replace({'-':'.'}) %}
+        <sparkle:version>{{ sparkle_version }}</sparkle:version>
+        <sparkle:shortVersionString>{{ rel }}</sparkle:shortVersionString>
+        {% if '-' in rel %}
+          {% set line = rel|split('-')[0] %}
+        {% else %}
+          {% set parts = rel|split('.') %}
+          {% set line = parts[0] ~ '.' ~ parts[1] ~ '.' ~ parts[2] %}
+        {% endif %}
+        <sparkle:channel>{{ line }}</sparkle:channel>
+        <description><![CDATA[{{ post.content|markdown_to_html|html_to_absolute_urls|raw }}]]></description>
+        <pubDate>{{ post.date|date('Y-m-d\\TH:i:sP') }}</pubDate>
+        {% if meta.minimum_windows_version is defined %}<sparkle:minimumSystemVersion>{{ meta.minimum_windows_version }}</sparkle:minimumSystemVersion>{% endif %}
+        {% if meta.critical_update is defined %}<sparkle:criticalUpdate></sparkle:criticalUpdate>{% endif %}
+         {% if meta.minimum_autoupdate_version is defined %}<sparkle:minimumAutoupdateVersion>{{ meta.minimum_autoupdate_version }}</sparkle:minimumAutoupdateVersion>{% endif %}
+        {% if meta.phased_rollout_interval is defined %}<sparkle:phasedRolloutInterval>{{ meta.phased_rollout_interval }}</sparkle:phasedRolloutInterval>{% endif %}
+        
+        {% if meta.win32_signature is defined %}
+        <enclosure sparkle:os="windows-x86"
+            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-Windows-i686-Setup-{{ meta.release_version }}.zip"
+            length="0"
+            type="application/octet-stream"
+            sparkle:dsaSignature="{{ meta.win32_signature }}"/>
+        {% endif %}
+        {% if meta.win64_signature is defined %}
+        <enclosure sparkle:os="windows-x64"
+            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-Windows-x86_64-Setup-{{ meta.release_version }}.zip"
+            length="0"
+            type="application/octet-stream"
+            sparkle:dsaSignature="{{ meta.win64_signature }}"/>
+        {% endif %}
+      </item>
+        {% endif %}
+    {% endif %}
+    {% endfor %}
+  </channel>
+</rss>

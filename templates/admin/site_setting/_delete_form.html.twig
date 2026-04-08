@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_admin_settings_delete', {'id': site_setting.id}) }}" onsubmit="return confirm('Are you sure you want to delete this setting?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ site_setting.id) }}">
+    <button class="btn" style="background-color: #dc3545; color: white;">Delete</button>
+</form>

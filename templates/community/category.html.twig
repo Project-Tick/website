@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }} - Community{% endblock %}
+
+{% block body %}
+<div class="py-5" style="background: var(--pt-white);">
+    <div class="container">
+        <nav style="font-size: 0.85rem; color: var(--pt-gray-600); margin-bottom: 20px;">
+            <a href="{{ path('app_community') }}" style="color: inherit; text-decoration: none;">Community</a> / 
+            {{ category.name }}
+        </nav>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 4px solid var(--pt-red); padding-bottom: 16px;">
+            <div>
+                <h1 style="margin: 0; font-size: 2.5rem;">{{ category.name }}</h1>
+                <p style="margin: 8px 0 0; color: var(--text-secondary);">{{ category.description }}</p>
+            </div>
+            <a href="{{ path('app_community_thread_new', {categoryId: category.id}) }}" class="btn btn-primary" style="padding: 10px 24px; border-radius: 4px;">+ New Discussion</a>
+        </div>
+
+        <div class="threads-list">
+            {% for thread in category.threads|reverse %}
+                <div class="card mb-3" style="padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.2rem;">
+                            <a href="{{ path('app_community_thread', {id: thread.id}) }}" style="color: var(--pt-black); text-decoration: none;">{{ thread.title }}</a>
+                        </h3>
+                        <div style="font-size: 0.85rem; color: var(--pt-gray-500); margin-top: 8px;">
+                            Posted by <strong>{{ thread.author.username ?: thread.author.githubUsername }}</strong> on {{ thread.createdAt|date('M d, Y') }}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: var(--pt-gray-100); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--pt-gray-600); font-weight: bold;">
+                            {{ thread.comments|length }} comments
+                        </span>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 60px; background: var(--pt-gray-100); border-radius: 8px;">
+                    <p style="color: #888;">No discussions yet in this category. Be the first to start one!</p>
+                    <a href="{{ path('app_community_thread_new', {categoryId: category.id}) }}" class="btn btn-secondary" style="margin-top: 16px;">Ask a Question</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

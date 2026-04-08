@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout - {{ product.title }}{% endblock %}
+
+{% block body %}
+<div style="background: var(--pt-gray-10); min-height: 80vh; padding: 60px 0;">
+    <div class="container" style="max-width: 1000px;">
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+            
+            <!-- Left Side: Product Info -->
+            <div>
+                <div class="card" style="padding: 32px; border-radius: 12px; border: 1px solid var(--border-color); background: white;">
+                    <h2 style="margin-top: 0; margin-bottom: 24px; font-size: 1.5rem;">Purchase Information</h2>
+                    
+                    <div style="display: flex; gap: 24px; margin-bottom: 32px;">
+                        {% if product.imageUrl %}
+                            <img src="{{ product.imageUrl }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
+                        {% endif %}
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.25rem; color: var(--pt-red);">{{ product.title }}</h3>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 8px;">{{ product.summary|default('Full ecosystem lifetime license including all future updates and priority support.') }}</p>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--pt-gray-100); padding: 20px; border-radius: 8px; border-left: 4px solid var(--pt-red);">
+                        <h4 style="margin: 0 0 8px 0; font-size: 0.95rem;">Premium Features Included:</h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #555; line-height: 1.6;">
+                            <li>Commercial Use Authorization</li>
+                            <li>API Access & Developer Tools</li>
+                            <li>Electronic Signature Verification</li>
+                            <li>Cloud Sync Capabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Payment & Simulation -->
+            <div>
+                <div class="card" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid var(--border-color); position: sticky; top: 20px;">
+                    <div id="paddle-container">
+                        <div style="background: white; padding: 32px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); margin-bottom: 32px;">
+                            <img src="https://cdn.paddle.com/paddle/assets/images/logos/paddle-logo-dark.svg" width="100" style="margin-bottom: 20px; opacity: 0.8;">
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 24px;">Global payment processing via Paddle. <br>Supports Credit Cards, PayPal and Apple Pay.</p>
+                            
+                            <button id="buy-button" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(238, 0, 0, 0.2); background: #000; border: none;">
+                                Pay ${{ product.price|default('0.00') }} with Paddle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Test Mode Section -->
+                    <div style="background: rgba(255, 152, 0, 0.05); border: 1px solid rgba(255, 152, 0, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                        <span style="display: inline-block; background: #FF9800; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase;">Development Tools</span>
+                        <h4 style="margin: 0 0 8px 0; font-size: 1rem; color: #E65100;">Simulate Success</h4>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Use this to bypass real payment and issue a test license key for development.</p>
+                        
+                        <form action="{{ path('app_checkout_pay_test', {slug: product.slug}) }}" method="POST">
+                            <input type="hidden" name="_token" value="{{ csrf_token('pay_test') }}">
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; padding: 14px; font-size: 0.9rem; font-weight: 600; border-color: #FF9800; color: #E65100; background: white;">
+                                Simulate Payment Success
+                            </button>
+                        </form>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                            <span>Subtotal</span>
+                            <span>${{ product.price|default('0.00') }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 16px; font-size: 1.25rem; font-weight: 800; color: var(--pt-black);">
+                            <span>Total</span>
+                            <span>${{ product.price|default('0.00') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.paddle.com/paddle/paddle.js"></script>
+<script type="text/javascript">
+    document.getElementById('buy-button').addEventListener('click', function() {
+        alert('Paddle is in sandbox mode. No real charge will occur. Ready for Vendor ID integration.');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New License Category{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="max-width: 800px;">
+        <h1>Create License Category</h1>
+        <p class="mb-4">Organize your licenses into logical groups.</p>
+        
+        <div class="card">
+            {{ form_start(form) }}
+                <div class="form-group">
+                    <label class="form-label">Category Name</label>
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'e.g. Software Licenses'}}) }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Display Order</label>
+                    {{ form_widget(form.displayOrder, {'attr': {'class': 'form-control'}}) }}
+                    <small style="color: var(--text-secondary);">Lower numbers appear first.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'style': 'min-height: 100px;'}}) }}
+                </div>
+                
+                <div style="margin-top: 32px; display: flex; gap: 16px;">
+                    <button type="submit" class="btn btn-primary">Save Category</button>
+                    <a href="{{ path('app_admin_license_categories') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

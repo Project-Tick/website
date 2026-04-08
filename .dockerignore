@@ -1,0 +1,13 @@
+.git
+.env
+.env.test
+.env.local
+.env.*.local
+/var/
+/vendor/
+/tests/
+/node_modules/
+docker-compose.yml
+Dockerfile
+README.md
+DEPLOY.md

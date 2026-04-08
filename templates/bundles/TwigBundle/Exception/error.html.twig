@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Application Error - Project Tick{% endblock %}
+
+{% block body %}
+<div style="background: var(--pt-black-900); min-height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding: 40px; border-top: 4px solid var(--pt-red);">
+    <div style="max-width: 600px;">
+        <div style="display: inline-block; padding: 12px 24px; border: 2px solid var(--pt-red); font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; margin-bottom: 32px; background: rgba(238, 0, 0, 0.05); clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);">
+            SYSTEM NOTIFICATION {% if status_code is defined %}({{ status_code }}){% endif %}
+        </div>
+        
+        <h1 style="font-family: var(--font-display); font-size: 3.5rem; margin-bottom: 16px; letter-spacing: -1px;">Protocol Deviation</h1>
+        
+        <p style="color: var(--pt-gray-300); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+            The application encountered an unexpected state. This may be due to temporary maintenance or a configuration mismatch.
+        </p>
+
+        <div style="display: flex; gap: 16px; justify-content: center;">
+            <a href="{{ path('app_home') }}" class="btn btn-primary" style="padding: 14px 40px;">Return to Hub</a>
+        </div>
+
+        <div style="margin-top: 60px; font-size: 0.8rem; color: #444; font-family: monospace; letter-spacing: 1px;">
+            DIAGNOSTIC: {{ status_text|default('UNSPECIFIED_BEHAVIOR')|upper }}
+        </div>
+    </div>
+</div>
+{% endblock %}

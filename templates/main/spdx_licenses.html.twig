@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Global Open Source Licenses - Project Tick{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="container">
+        <h1>Global Licenses</h1>
+        <p class="lead">A comprehensive database of industry-standard open source licenses from SPDX and OSI.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div style="margin-bottom: 30px;">
+        <form method="GET" action="{{ path('app_spdx_licenses') }}" style="display: flex; gap: 10px; max-width: 500px;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search by name or identifier (e.g. MIT, GPL)..." 
+                   style="flex: 1; padding: 12px 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.03); outline: none;">
+            <button type="submit" class="btn btn-primary" style="border-radius: 12px;">Search</button>
+            {% if q %}
+                <a href="{{ path('app_spdx_licenses') }}" class="btn btn-secondary" style="border-radius: 12px; display: flex; align-items: center;">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card" style="margin-bottom: 40px;">
+        <div style="overflow-x: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Identifier</th>
+                        <th>Name</th>
+                        <th>OSI Approved</th>
+                        <th>Resources</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for license in licenses %}
+                        <tr>
+                            <td class="font-monospace" style="font-weight: 700; color: var(--pt-red);">
+                                <a href="{{ path('app_spdx_license_show', {identifier: license.identifier}) }}" style="color: inherit; text-decoration: none;">{{ license.identifier }}</a>
+                            </td>
+                            <td>{{ license.name }}</td>
+                            <td>
+                                {% if license.isOsiApproved %}
+                                    <span class="badge badge-status-active">YES</span>
+                                {% else %}
+                                    <span class="badge badge-outline" style="opacity: 0.5;">NO</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <a href="{{ path('app_spdx_license_show', {identifier: license.identifier}) }}" class="btn btn-ghost" style="padding: 4px 0;">View &rarr;</a>
+                                    <a href="{{ path('app_spdx_license_raw', {identifier: license.identifier}) }}" target="_blank" class="btn btn-ghost" style="padding: 4px 0; opacity: 0.7;">.txt</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">No licenses synced yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

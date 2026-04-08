@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header">
+        <h1>Admin Panel <span class="admin-breadcrumb">/ Overview</span></h1>
+    </div>
+
+    <div class="admin-grid mt-4">
+        <!-- Licenses Card -->
+        <div class="card">
+            <h3>Licenses</h3>
+            <p style="color: var(--text-secondary);">Total instruments: <strong>{{ license_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_licenses') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_licenses_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- License Categories Card -->
+        <div class="card">
+            <h3>License Categories</h3>
+            <p style="color: var(--text-secondary);">Rule how licenses are grouped.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_license_categories') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_license_categories_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- News Card -->
+        <div class="card">
+            <h3>News & Project Updates</h3>
+            <p style="color: var(--text-secondary);">Total posts: <strong>{{ news_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_news') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_news_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="card">
+            <h3>User Directory</h3>
+            <p style="color: var(--text-secondary);">Manage global users and access.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_users') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_register') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ Create</a>
+            </div>
+        </div>
+        
+        <!-- Handbook Card -->
+        <div class="card">
+            <h3>Handbook</h3>
+            <p style="color: var(--text-secondary);">Total pages: <strong>{{ handbook_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_handbook') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_handbook_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+        <!-- Products Card -->
+        <div class="card">
+            <h3>Products</h3>
+            <p style="color: var(--text-secondary);">Manage software products and landing pages.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_products_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_products_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+        <!-- License Comparison Card -->
+        <div class="card">
+            <h3>License Comparison</h3>
+            <p style="color: var(--text-secondary);">Manage the comparison table on the licenses page.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_license_comparison_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_license_comparison_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New Row</a>
+            </div>
+        </div>
+        <!-- Site Settings Card -->
+        <div class="card">
+            <h3>Site Settings</h3>
+            <p style="color: var(--text-secondary);">Configure global site options (Home, Footer, CLA, Social).</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_settings_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage Settings</a>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}

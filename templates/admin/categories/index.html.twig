@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Categories{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Manage News Categories</h1>
+    <a href="{{ path('app_admin_categories_new') }}" class="btn btn-primary" style="margin-bottom: 20px;">Create New Category</a>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.name }}</td>
+                <td>{{ category.slug }}</td>
+                <td>
+                    <a href="{{ path('app_admin_categories_edit', {id: category.id}) }}">Edit</a>
+                    <form method="post" action="{{ path('app_admin_categories_delete', {id: category.id}) }}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <p><a href="{{ path('app_admin_dashboard') }}">&larr; Back to Dashboard</a></p>
+</div>
+{% endblock %}

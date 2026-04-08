@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Results for "{{ query }}"{% endblock %}
+
+{% block body %}
+<div class="hero-header" style="padding: 60px 0;">
+    <div class="container">
+        <h1>Search Results</h1>
+        <p class="lead">Showing results for <strong>"{{ query }}"</strong></p>
+    </div>
+</div>
+
+<div class="py-5">
+    <div class="container">
+        <div class="search-results-grid">
+            <div class="results-main">
+                {# Product Results #}
+                <section class="mb-5">
+                    <h2 class="search-section-title pt-red">Products</h2>
+                    {% for p in products %}
+                        <div class="card mb-3 search-card">
+                            <h3 class="search-card-title">
+                                <a href="{{ path('app_product_show', {slug: p.slug}) }}">{{ p.title }}</a>
+                            </h3>
+                            <p class="search-card-preview">{{ p.summary ?: p.description|striptags|slice(0, 150) }}...</p>
+                        </div>
+                    {% else %}
+                        <p class="search-no-results">No products found.</p>
+                    {% endfor %}
+                </section>
+
+                {# Handbook Results #}
+                <section class="mb-5">
+                    <h2 class="search-section-title pt-red">Handbook & Documentation</h2>
+                    {% for item in handbook %}
+                        <div class="card mb-3 search-card">
+                            <h3 class="search-card-title">
+                                <a href="{{ path('app_handbook_show', {slug: item.slug}) }}">{{ item.title }}</a>
+                            </h3>
+                            <p class="search-card-preview">{{ item.content|striptags|slice(0, 200) }}...</p>
+                        </div>
+                    {% else %}
+                        <p class="search-no-results">No documentation matches found.</p>
+                    {% endfor %}
+                </section>
+
+                {# News Results #}
+                <section class="mb-5">
+                    <h2 class="search-section-title news-blue">News & Updates</h2>
+                    {% for post in news %}
+                        <div class="card mb-3 search-card">
+                            <h3 class="search-card-title">
+                                {% if post.product %}
+                                    <a href="{{ path('app_product_news_show', {slug: post.product.slug, newsSlug: post.slug}) }}">{{ post.title }}</a>
+                                {% else %}
+                                    <a href="{{ path('app_project_news_show', {slug: post.slug}) }}">{{ post.title }}</a>
+                                {% endif %}
+                            </h3>
+                            <p class="search-card-preview">{{ post.description ?: post.content|striptags|slice(0, 200) }}...</p>
+                        </div>
+                    {% else %}
+                        <p class="search-no-results">No news matches found.</p>
+                    {% endfor %}
+                </section>
+            </div>
+
+            <div class="results-sidebar">
+                {# User Results #}
+                <section>
+                    <h2 class="search-section-title profile-green">Profiles</h2>
+                    <div class="user-results-list">
+                        {% for user in users %}
+                            <div class="card mb-3 user-search-card">
+                                <div class="user-avatar-small">
+                                    <img src="https://www.gravatar.com/avatar/{{ (user.email ?: '')|trim|lower|md5 }}?s=40&d=mp" alt="{{ user.username }}">
+                                </div>
+                                <a href="{{ path('app_public_profile', {username: user.username ?: user.githubUsername}) }}" class="user-profile-link">
+                                    {{ user.username ?: user.githubUsername }}
+                                </a>
+                            </div>
+                        {% else %}
+                            <p class="search-no-results">No users found.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <style>
+            .search-results-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 40px;
+            }
+            .search-section-title {
+                font-size: 1.5rem;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+            .search-section-title.pt-red { border-color: var(--pt-red); }
+            .search-section-title.news-blue { border-color: #1976D2; }
+            .search-section-title.profile-green { border-color: #2E7D32; font-size: 1.25rem; }
+            
+            .search-card { padding: 24px; }
+            .search-card-title { margin: 0; font-size: 1.25rem; }
+            .search-card-title a { color: var(--text-primary); text-decoration: none; }
+            .search-card-preview { font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px; margin-bottom: 0; }
+            
+            .user-search-card { padding: 16px; display: flex; align-items: center; gap: 12px; }
+            .user-avatar-small { width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+            .user-profile-link { font-weight: 600; color: var(--text-primary); text-decoration: none; }
+            
+            .search-no-results { color: #888; font-style: italic; }
+
+            @media (max-width: 991px) {
+                .search-results-grid {
+                    grid-template-columns: 1fr;
+                }
+                .results-sidebar {
+                    order: -1;
+                    margin-bottom: 40px;
+                }
+            }
+        </style>
+    </div>
+</div>
+{% endblock %}

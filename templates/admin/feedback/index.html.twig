@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Documentation Feedback - Admin{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header">
+        <h1>Handbook Feedback <span class="admin-breadcrumb">/ User Ratings</span></h1>
+    </div>
+
+    <div class="card mt-4">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Page</th>
+                        <th>Rating</th>
+                        <th>User / IP</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedbacks %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('app_handbook_show', {slug: feedback.entry.slug}) }}" target="_blank">
+                                    {{ feedback.entry.title }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if feedback.helpful %}
+                                    <span class="badge" style="background: #E7F4E4; color: #2E7D32;">Helpful</span>
+                                {% else %}
+                                    <span class="badge" style="background: #FDF2F2; color: #C62828;">Not Helpful</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.85rem; color: #666;">
+                                {% if feedback.user %}
+                                    {{ feedback.user.username ?: feedback.user.githubUsername }}
+                                {% else %}
+                                    {{ feedback.ip }}
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.85rem; color: #888;">{{ feedback.createdAt|date('M d, Y @ H:i') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #888;">No feedback ratings received yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

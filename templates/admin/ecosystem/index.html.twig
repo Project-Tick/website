@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Ecosystem Map{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1>Ecosystem Nodes <span class="admin-breadcrumb">/ Map Nodes</span></h1>
+            <p style="color: #666; margin-top: 8px;">Manage the interactive points on the Ecosystem Map.</p>
+        </div>
+        <a href="{{ path('app_admin_ecosystem_new') }}" class="btn btn-primary">+ Add New Node</a>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--pt-gray-100); text-align: left;">
+                    <th style="padding: 16px;">Title</th>
+                    <th style="padding: 16px;">Shortcut</th>
+                    <th style="padding: 16px;">Position (X/Y)</th>
+                    <th style="padding: 16px;">Type</th>
+                    <th style="padding: 16px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for node in nodes %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px; font-weight: 600;">{{ node.title }}</td>
+                    <td style="padding: 16px; font-family: monospace;">{{ node.shortcut }}</td>
+                    <td style="padding: 16px;">{{ node.positionX }}% / {{ node.positionY }}%</td>
+                    <td style="padding: 16px;">
+                        <span class="badge {{ node.type == 'central' ? 'badge-primary' : 'badge-secondary' }}" style="padding: 4px 8px; border-radius: 4px; background: {{ node.type == 'central' ? 'var(--pt-red)' : '#333' }}; color: white; font-size: 0.75rem;">
+                            {{ node.type|upper }}
+                        </span>
+                    </td>
+                    <td style="padding: 16px; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                        <a href="{{ path('app_admin_ecosystem_edit', {'id': node.id}) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">Edit</a>
+                        <form method="post" action="{{ path('app_admin_ecosystem_delete', {'id': node.id}) }}" onsubmit="return confirm('Delete this node?');" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ node.id) }}">
+                            <button class="btn btn-primary" style="background: var(--pt-red); border: none; padding: 6px 12px; font-size: 0.85rem;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="padding: 40px; text-align: center; color: #888;">
+                        No nodes found. Add the first node to the map.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ license.name }} - Global License{% endblock %}
+
+{% block body %}
+<div class="hero-section">
+    <div class="container">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; justify-content: center;">
+            <span class="badge badge-dark">{{ license.identifier }}</span>
+            {% if license.isOsiApproved %}
+                <span class="badge badge-status-active">OSI APPROVED</span>
+            {% endif %}
+        </div>
+        <h1>{{ license.name }}</h1>
+        <p class="lead">Universal standard license provided by SPDX registry.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="grid" style="grid-template-columns: 3fr 1fr;">
+        <div>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <h3 style="margin: 0;">License Text</h3>
+                    <a href="{{ path('app_spdx_license_raw', {identifier: license.identifier}) }}" class="btn btn-secondary" target="_blank">View Raw .txt</a>
+                </div>
+                
+                {% if license.content %}
+                    <pre class="font-monospace" style="background: var(--pt-gray-100); padding: 32px; border: 1px solid var(--border-color); white-space: pre-wrap; font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); max-height: 800px; overflow-y: auto;">{{ license.content }}</pre>
+                {% else %}
+                    <div class="notification type-info">
+                        Full text for this license is not yet cached locally. You can view it on the official registry.
+                        <br><br>
+                        <a href="{{ license.seeAlso }}" target="_blank" class="btn btn-primary">Visit SPDX Registry &rarr;</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <div class="card" style="position: sticky; top: 100px;">
+                <h4 style="margin-top: 0; margin-bottom: 16px; border-bottom: 2px solid var(--pt-red); display: inline-block;">Details</h4>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">SPDX Identifier</label>
+                    <code class="font-monospace" style="font-size: 1.1rem; color: var(--pt-red); font-weight: 700;">{{ license.identifier }}</code>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Status</label>
+                    {% if license.isOsiApproved %}
+                        <div style="color: #2E7D32; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                            OSI Approved
+                        </div>
+                    {% else %}
+                        <div style="color: var(--text-secondary);">Proprietary / Other</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">External Link</label>
+                    <a href="{{ license.seeAlso }}" target="_blank" style="font-size: 0.9rem; word-break: break-all;">{{ license.seeAlso }}</a>
+                </div>
+
+                <button onclick="window.print()" class="btn btn-secondary" style="width: 100%;">Print License</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

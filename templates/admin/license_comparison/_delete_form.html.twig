@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_admin_license_comparison_delete', {'id': comparison.id}) }}" onsubmit="return confirm('Are you sure you want to delete this comparison item?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comparison.id) }}">
+    <button class="btn btn-secondary" style="color: var(--pt-red);">Delete</button>
+</form>

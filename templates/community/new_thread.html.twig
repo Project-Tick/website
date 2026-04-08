@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Discussion in {{ category.name }}{% endblock %}
+
+{% block body %}
+<div class="py-5" style="background: var(--pt-white);">
+    <div class="container" style="max-width: 800px;">
+        <nav style="font-size: 0.85rem; color: var(--pt-gray-600); margin-bottom: 20px;">
+            <a href="{{ path('app_community') }}" style="color: inherit; text-decoration: none;">Community</a> / 
+            <a href="{{ path('app_community_category', {id: category.id}) }}" style="color: inherit; text-decoration: none;">{{ category.name }}</a> / 
+            New Discussion
+        </nav>
+
+        <h1 style="margin-bottom: 32px;">Start a New Discussion</h1>
+
+        <div class="card" style="padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <form method="POST">
+                <div class="form-group mb-4">
+                    <label class="form-label" style="font-weight: 700;">Discussion Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="Summarize your topic..." required autofocus>
+                </div>
+
+                <div class="form-group mb-5">
+                    <label class="form-label" style="font-weight: 700;">Content</label>
+                    <textarea name="content" rows="12" class="form-control" placeholder="What's on your mind? Be descriptive..." required></textarea>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 40px; border-radius: 4px; font-weight: 700;">Post Discussion</button>
+                    <a href="{{ path('app_community_category', {id: category.id}) }}" class="btn btn-secondary" style="padding: 12px 32px; border-radius: 4px;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

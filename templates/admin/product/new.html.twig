@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Product - Admin{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header reveal-up">
+        <h1>New Product <span class="admin-breadcrumb">/ Create</span></h1>
+    </div>
+
+    <div class="card reveal-up" style="max-width: 900px; margin: 32px 0;">
+        {{ form_start(form) }}
+            <div class="stagger-reveal">
+                {{ form_widget(form) }}
+            </div>
+            
+            <div class="admin-card-actions">
+                <button class="btn btn-primary">{{ button_label|default('Create Product') }}</button>
+                <a href="{{ path('app_admin_products_index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_admin_products_index') }}">&larr; Back to List</a>
+    </div>
+</div>
+    
+    <script>
+        // Simple JS to handle CollectionType adding if needed
+        // For now, reliance on standard form handling or user can manage simple text inputs
+        // A more complex implementation would require stimulus controller
+    </script>
+{% endblock %}

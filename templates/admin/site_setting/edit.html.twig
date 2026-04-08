@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Site Setting{% endblock %}
+
+{% block body %}
+    <h1>Edit Site Setting</h1>
+
+    <div class="card" style="max-width: 800px; margin-top: 24px;">
+        {{ include('admin/site_setting/_form.html.twig', {'button_label': 'Update'}) }}
+    </div>
+
+    <div style="margin-top: 24px;">
+        {{ include('admin/site_setting/_delete_form.html.twig') }}
+    </div>
+
+    <a href="{{ path('app_admin_settings_index') }}">back to list</a>
+{% endblock %}

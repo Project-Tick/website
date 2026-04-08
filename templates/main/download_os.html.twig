@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Download {{ product.title }} for {{ os|capitalize }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+
+{% block body %}
+<style>
+    .download-os-container {
+        background: var(--pt-white);
+        border: 1px solid var(--border-color);
+        padding: 40px;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    body.dark-theme .download-os-container {
+        background: #151515 !important;
+        border-color: #333 !important;
+    }
+    
+    .back-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .back-link:hover {
+        color: var(--pt-red);
+    }
+</style>
+
+<div class="hero" style="padding: 40px 0; background: var(--pt-black-900); text-align: center; color: white; margin-bottom: 40px; border-bottom: 4px solid var(--pt-red);">
+    <div class="container">
+        <span style="background: var(--pt-red); color: white; padding: 4px 12px; font-weight: bold; font-size: 0.9rem; margin-bottom: 16px; display: inline-block;">{{ os|upper }} DOWNLOAD</span>
+        <h1 style="font-size: 3rem; margin-bottom: 8px;">{{ product.title }} for {{ os|capitalize }}</h1>
+        <p style="color: #D2D2D2;">Select your preferred installation method below.</p>
+    </div>
+</div>
+
+<div class="container" style="max-width: 1000px; margin-top: 40px; margin-bottom: 80px;">
+    <div class="download-os-container">
+        
+        {% set context = {
+            'product': product,
+            'os': os,
+            'version': {'current': product.version}
+        } %}
+
+        {% set field_content = os == 'windows' ? product.downloadContentWindows : (os == 'macos' ? product.downloadContentMacos : product.downloadContentLinux) %}
+        {% set field_html = os == 'windows' ? product.useHtmlWindows : (os == 'macos' ? product.useHtmlMacos : product.useHtmlLinux) %}
+
+        {% if field_content %}
+            <div class="prose">
+                {% if field_html %}
+                    {{ field_content|raw }}
+                {% else %}
+                    {{ field_content|markdown_to_html|raw }}
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p style="color: var(--text-secondary);">Download content for this platform is not yet available.</p>
+            </div>
+        {% endif %}
+
+        <div style="margin-top: 40px; text-align: center; border-top: 1px solid var(--border-color); padding-top: 24px;">
+            <a href="{{ path('app_product_download', {'slug': product.slug}) }}" class="back-link">&larr; Back to Platform Selection</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

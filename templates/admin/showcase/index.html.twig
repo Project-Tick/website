@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Showcase{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1>App Showcase <span class="admin-breadcrumb">/ Community Projects</span></h1>
+        </div>
+        <a href="{{ path('app_admin_showcase_new') }}" class="btn btn-primary">+ Add New App</a>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: var(--pt-gray-100);">
+                    <th style="padding: 16px;">App Name</th>
+                    <th style="padding: 16px;">Developer</th>
+                    <th style="padding: 16px;">Status</th>
+                    <th style="padding: 16px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in apps %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 16px; font-weight: 600;">{{ app.name }}</td>
+                    <td style="padding: 16px;">{{ app.developer }}</td>
+                    <td style="padding: 16px;">
+                        {% if app.isFeatured %}
+                            <span class="badge" style="background: var(--pt-red); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem;">FEATURED</span>
+                        {% else %}
+                            <span class="badge" style="background: #eee; color: #666; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem;">STANDARD</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 16px; text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                        <a href="{{ path('app_admin_showcase_edit', {'id': app.id}) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;">Edit</a>
+                        <form method="post" action="{{ path('app_admin_showcase_delete', {'id': app.id}) }}" onsubmit="return confirm('Delete this showcased app?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ app.id) }}">
+                            <button class="btn btn-primary" style="background: var(--pt-red); border: none; padding: 6px 12px; font-size: 0.85rem;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 40px; text-align: center; color: #888;">No apps in the showcase yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

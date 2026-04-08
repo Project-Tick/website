@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ecosystem Map - {{ node.id ? 'Edit' : 'New' }} Node{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header" style="margin-bottom: 32px;">
+        <h1>{{ node.id ? 'Edit Node' : 'New Node' }} <span class="admin-breadcrumb">/ {{ node.title ?: 'Create' }}</span></h1>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_label(form.title) }}
+                {{ form_widget(form.title) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.shortcut) }}
+                {{ form_widget(form.shortcut) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    {{ form_label(form.positionX) }}
+                    {{ form_widget(form.positionX) }}
+                    {{ form_help(form.positionX) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.positionY) }}
+                    {{ form_widget(form.positionY) }}
+                    {{ form_help(form.positionY) }}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type) }}
+            </div>
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary">{{ node.id ? 'Save Changes' : 'Create Node' }}</button>
+                <a href="{{ path('app_admin_ecosystem') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

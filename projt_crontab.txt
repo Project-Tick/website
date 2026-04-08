@@ -1,0 +1,7 @@
+# Project Tick Automation Suite
+* * * * * /usr/bin/php /var/www/projt-website/bin/console app:github:bot-scan >> /var/www/projt-website/var/log/cron_bot.log 2>&1
+*/5 * * * * /usr/bin/php /var/www/projt-website/bin/console app:gitlab-observer >> /var/www/projt-website/var/log/cron_gitlab.log 2>&1
+*/10 * * * * /usr/bin/php /var/www/projt-website/bin/console app:check-cla >> /var/www/projt-website/var/log/cron_cla.log 2>&1
+*/2 * * * * /usr/bin/php /var/www/projt-website/bin/console app:monitor:check >> /var/www/projt-website/var/log/cron_monitor.log 2>&1
+0 * * * * /usr/bin/php /var/www/projt-website/bin/console app:github:sync-repos >> /var/www/projt-website/var/log/cron_sync.log 2>&1
+30 * * * * /usr/bin/php /var/www/projt-website/bin/console app:github:sync-commits >> /var/www/projt-website/var/log/cron_sync.log 2>&1

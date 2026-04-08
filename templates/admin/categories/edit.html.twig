@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Category{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width: 600px; margin: 40px auto;">
+    <h1>Edit Category: {{ category.name }}</h1>
+    
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.slug) }}
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Update Category</button>
+        <a href="{{ path('app_admin_categories') }}" class="btn btn-secondary" style="margin-top: 20px;">Cancel</a>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

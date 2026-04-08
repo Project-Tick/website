@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit News Post{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="max-width: 900px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+            <div>
+                <h1>Edit News Post</h1>
+                <p>Updating <code>{{ news.title }}</code></p>
+            </div>
+            <form method="post" action="{{ path('app_admin_news_delete', {'id': news.id}) }}" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ news.id) }}">
+                <button class="btn btn-secondary" style="color: var(--pt-red); border-color: var(--pt-red);">Delete Post</button>
+            </form>
+        </div>
+        
+        <div class="card p-4">
+            {{ form_start(form, {'attr': {'id': 'news_form'}}) }}
+                <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="form-group mb-3">
+                        {{ form_label(form.title) }}
+                        {{ form_widget(form.title) }}
+                    </div>
+                    <div class="form-group mb-3">
+                        {{ form_label(form.date) }}
+                        {{ form_widget(form.date) }}
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group mb-3">
+                        {{ form_label(form.slug) }}
+                        {{ form_widget(form.slug) }}
+                    </div>
+                    <div class="form-group mb-3">
+                        {{ form_label(form.product) }}
+                        {{ form_widget(form.product) }}
+                    </div>
+                </div>
+
+                 <!-- Sparkle Fields -->
+                <div id="sparkle_section" style="display: none; background: #fdf2f0; border: 1px solid #fee2e2; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                    <h4 style="margin-top: 0; font-size: 1rem; color: #b91c1c; margin-bottom: 16px;">Sparkle Release Metadata</h4>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            {{ form_label(form.release_version) }}
+                            {{ form_widget(form.release_version) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.minimum_macos_version) }}
+                            {{ form_widget(form.minimum_macos_version) }}
+                        </div>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 100px 1fr; gap: 16px; margin-top: 16px;">
+                        <div class="form-group">
+                            {{ form_label(form.macos_file_extension) }}
+                            {{ form_widget(form.macos_file_extension) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.macos_signature) }}
+                            {{ form_widget(form.macos_signature) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description) }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ form_label(form.content) }}
+                    {{ form_widget(form.content) }}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.metadata) }}
+                    {{ form_widget(form.metadata) }}
+                    <div class="form-help text-muted small">{{ form_help(form.metadata) }}</div>
+                </div>
+                
+                <div class="admin-card-actions mt-4 pt-4 border-top">
+                    <button type="submit" class="btn btn-primary">Update Post</button>
+                    <a href="{{ path('app_admin_news') }}" class="btn btn-secondary">Cancel</a>
+                    {% if news.product and news.product.slug == 'projt-launcher' %}
+                         <a href="{{ path('app_news_show', {slug: news.slug}) }}" target="_blank" class="btn btn-ghost">Preview</a>
+                    {% elseif news.product %}
+                         <a href="{{ path('app_product_news_show', {slug: news.product.slug, newsSlug: news.slug}) }}" target="_blank" class="btn btn-ghost">Preview</a>
+                    {% else %}
+                         <a href="{{ path('app_project_news_show', {slug: news.slug}) }}" target="_blank" class="btn btn-ghost">Preview</a>
+                    {% endif %}
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSparkleFields(select) {
+    const section = document.getElementById('sparkle_section');
+    const selectedOption = select.options[select.selectedIndex];
+    const isSparkle = selectedOption && selectedOption.getAttribute('data-sparkle') === '1';
+    
+    section.style.display = isSparkle ? 'block' : 'none';
+}
+
+function populateSparkleFields() {
+    const metadataTextarea = document.querySelector('.metadata-editor');
+    if (!metadataTextarea) return;
+
+    try {
+        const metadata = JSON.parse(metadataTextarea.value || '{}');
+        document.querySelectorAll('.sparkle-field').forEach(field => {
+            const key = field.getAttribute('data-key');
+            if (metadata[key]) {
+                field.value = metadata[key];
+            }
+        });
+    } catch (e) {
+        console.warn("Metadata JSON is not valid for parsing Sparkle fields");
+    }
+}
+
+function syncToMetadata() {
+    const metadataTextarea = document.querySelector('.metadata-editor');
+    if (!metadataTextarea) return;
+
+    let metadata = {};
+    try {
+        metadata = JSON.parse(metadataTextarea.value || '{}');
+    } catch (e) {
+        metadata = {};
+    }
+
+    document.querySelectorAll('.sparkle-field').forEach(field => {
+        const key = field.getAttribute('data-key');
+        if (field.value) {
+            metadata[key] = field.value;
+        } else {
+            delete metadata[key];
+        }
+    });
+
+    if (!metadata.tags && Object.keys(metadata).length > 0) {
+        metadata.tags = ['release'];
+    }
+
+    metadataTextarea.value = JSON.stringify(metadata, null, 4);
+}
+
+document.querySelectorAll('.sparkle-field').forEach(input => {
+    input.addEventListener('input', syncToMetadata);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const productSelect = document.querySelector('.product-selector');
+    if (productSelect) {
+        toggleSparkleFields(productSelect);
+    }
+    populateSparkleFields();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>{{ title|escape('html') }}</title>
+    <description>Latest news and updates for {{ title|escape('html') }}.</description>
+    <link>{{ site_url }}</link>
+    <atom:link href="{{ feed_url }}" rel="self" type="application/rss+xml" />
+    <lastBuildDate>{% if news is not empty %}{{ news[0].date|date('r') }}{% else %}{{ 'now'|date('r') }}{% endif %}</lastBuildDate>
+    <pubDate>{% if news is not empty %}{{ news[0].date|date('r') }}{% else %}{{ 'now'|date('r') }}{% endif %}</pubDate>
+    <ttl>1800</ttl>
+
+    {% for post in news %}
+    <item>
+        <title>{{ post.title|escape('html') }}</title>
+        <description><![CDATA[{{ post.content|markdown_to_html }}]]></description>
+        <link>{{ url('app_product_news_show', {'slug': app.request.get('slug'), 'newsSlug': post.slug}) }}</link>
+        <guid isPermaLink="true">{{ url('app_product_news_show', {'slug': app.request.get('slug'), 'newsSlug': post.slug}) }}</guid>
+        <pubDate>{{ post.date|date('r') }}</pubDate>
+    </item>
+    {% endfor %}
+</channel>
+</rss>

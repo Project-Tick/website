@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block body %}
+    <div class="custom-landing-wrapper">
+        {{ product.landingPageContent|raw }}
+    </div>
+
+    <style>
+        .custom-landing-wrapper {
+            min-height: 80vh;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-91XWT2Q4LY"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'G-91XWT2Q4LY');
+	</script>
+	<meta charset="UTF-8">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <title>{% block title %}{{ site_setting('site_title', 'Project Tick') }}{% endblock %}</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('img/logo.svg') }}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="/styles/app.css?v={{ 'now'|date('U') }}">
+    </head>
+    <body style="display: flex; flex-direction: column; min-height: 100vh;">
+        <!-- Red Hat Utility Bar -->
+        <div style="background-color: #EE0000; height: 4px; width: 100%;"></div>
+        
+        <nav class="site-nav" style="display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 80px;">
+            <div style="display: flex; align-items: center; height: 100%;">
+                <a href="{{ path('app_home') }}" class="brand" style="margin-right: 40px; display: flex; align-items: center; text-decoration: none; font-weight: 800; font-size: 1.3rem;">
+                    <img src="{{ asset('img/logo.svg') }}" alt="{{ site_setting('brand_name', 'Project Tick') }} Logo">
+                    {{ site_setting('brand_name', 'Project Tick') }}
+                </a>
+
+                {# Mobile Toggle Button #}
+                <button id="mobile-nav-toggle" style="background: transparent; border: 1px solid #444; color: white; padding: 8px 12px; cursor: pointer; display: none; border-radius: 4px; margin-left: auto;">
+                    <svg width="24" height="20" viewBox="0 0 20 16" fill="currentColor"><rect width="20" height="2"/><rect y="7" width="20" height="2"/><rect y="14" width="20" height="2"/></svg>
+                </button>
+
+                <div class="site-nav-links" id="site-nav-links" style="display: flex; align-items: center; height: 100%;">
+                    <div class="nav-item-dropdown" style="position: relative; height: 100%;">
+                        <details style="height: 100%;">
+                            <summary style="list-style: none; cursor: pointer; height: 100%; display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-family: var(--font-display);">
+                                {{ site_setting('nav_products_label', 'Products') }}
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left: 6px; opacity: 0.6;">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </summary>
+                            <div class="dropdown-menu" style="position: absolute; top: 100%; left: 0; background: var(--pt-white); border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.15); min-width: 250px; z-index: 1000; border-radius: 0 0 8px 8px;">
+                                {% set all_products = get_all_products() %}
+                                {% for prod in all_products %}
+                                    {% set prod_url = path('app_product_show', {'slug': prod.slug}) %}
+                                    <a href="{{ prod_url }}" style="display: block; padding: 16px 20px; border-bottom: 1px solid var(--pt-gray-100); color: var(--text-primary); text-decoration: none; transition: background 0.2s;">
+                                        <div style="font-weight: 700;">{{ prod.title }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; font-weight: normal;">{{ prod.summary }}</div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </div>
+
+                    <a href="{{ path('app_community') }}" class="nav-link {% if 'app_community' in app.request.attributes.get('_route') %}active{% endif %}" style="padding: 0 12px; font-weight: 600;">Community</a>
+                    <a href="{{ path('app_roadmap') }}" class="nav-link {% if 'app_roadmap' in app.request.attributes.get('_route') %}active{% endif %}" style="padding: 0 12px; font-weight: 600;">Roadmap</a>
+                    <a href="{{ path('app_project_news') }}" class="nav-link {% if 'app_project_news' in app.request.attributes.get('_route') %}active{% endif %}" style="padding: 0 12px; font-weight: 600;">News</a>
+                    
+                    <div class="nav-item-dropdown" style="position: relative; height: 100%;">
+                        <details style="height: 100%;">
+                            <summary style="list-style: none; cursor: pointer; height: 100%; display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-family: var(--font-display);">
+                                {{ site_setting('nav_resources_label', 'Resources') }}
+                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style="margin-left: 6px; opacity: 0.6;">
+                                    <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </summary>
+                            <div class="dropdown-menu" style="position: absolute; top: 100%; right: 0; background: var(--pt-white); border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; border-radius: 0 0 8px 8px;">
+                                <a href="{{ path('app_ecosystem') }}" style="display: block; padding: 12px 20px; border-bottom: 1px solid var(--pt-gray-100); color: var(--text-primary); text-decoration: none; transition: background 0.2s; font-weight: 600;">
+                                    Ecosystem Map
+                                </a>
+                                <a href="{{ path('app_forge') }}" style="display: block; padding: 12px 20px; border-bottom: 1px solid var(--pt-gray-100); color: var(--text-primary); text-decoration: none; transition: background 0.2s; font-weight: 600;">
+                                    Forge (Git)
+                                </a>
+                                <a href="{{ path('app_handbook') }}" style="display: block; padding: 12px 20px; border-bottom: 1px solid var(--pt-gray-100); color: var(--text-primary); text-decoration: none; transition: background 0.2s; font-weight: 600;">
+                                    Handbook
+                                </a>
+                                <a href="{{ path('app_licenses') }}" style="display: block; padding: 12px 20px; border-bottom: 1px solid var(--pt-gray-100); color: var(--text-primary); text-decoration: none; transition: background 0.2s; font-weight: 600;">
+                                    Licenses
+                                </a>
+                                <a href="{{ path('connect_microsoft_start') }}" style="display: block; padding: 12px 20px; color: var(--pt-red); text-decoration: none; transition: background 0.2s; font-weight: 700;">
+                                    Minecraft Login
+                                </a>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            <div class="desktop-extra" style="display: flex; align-items: center; gap: 16px; flex-shrink: 1;">
+                {# Professional Search Bar #}
+                <div class="search-container" style="width: 220px; transition: width 0.3s;">
+                    <form action="{{ path('app_global_search') }}" method="GET" class="pt-search-wrapper" style="margin: 0; width: 100%; position: relative;">
+                        <input type="text" name="q" placeholder="Search..." class="pt-search-input"
+                               onfocus="this.parentElement.parentElement.style.width='300px'"
+                               onblur="this.parentElement.parentElement.style.width='220px'">
+                        <svg class="pt-search-icon" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                            <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </form>
+                </div>
+
+                <div class="nav-auth-links" style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+
+
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <a href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : path('app_user_dashboard') }}" style="text-decoration: none;">
+                            <span style="background: var(--pt-red); color: white; padding: 10px 16px; font-weight: bold; border-radius: 4px; font-size: 0.8rem;">{{ site_setting('nav_panel_badge', 'PANEL') }}</span>
+                        </a>
+                        <a href="{{ path('app_logout') }}" style="color: #D2D2D2; text-decoration: none; font-weight: 600; font-size: 0.85rem;">Logout</a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" style="background: white; color: black; padding: 8px 20px; font-weight: bold; text-decoration: none; border-radius: 4px; font-size: 0.85rem;">{{ site_setting('nav_login_btn', 'LOGIN') }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <style>
+            .hidden { display: none !important; }
+            
+            /* Header Text Fixes for Dark/Light Mode */
+            .site-nav .brand, 
+            .site-nav summary,
+            .site-nav .nav-link {
+                color: white !important;
+            }
+            
+            body.dark-theme .site-nav summary,
+            body.dark-theme .site-nav .brand {
+                color: #FFFFFF !important;
+            }
+
+            @media (max-width: 1200px) {
+                #mobile-nav-toggle { display: block !important; }
+                .desktop-extra { display: none !important; }
+                
+                .site-nav-links {
+                    position: fixed !important;
+                    top: 84px !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    bottom: 0 !important;
+                    height: calc(100vh - 84px) !important;
+                    background: #000 !important;
+                    flex-direction: column !important;
+                    display: none !important;
+                    padding: 40px !important;
+                    z-index: 999999 !important;
+                    width: 100% !important;
+                    align-items: flex-start !important;
+                }
+
+                .site-nav-links.show {
+                    display: flex !important;
+                }
+
+                .site-nav-links > a, .nav-item-dropdown, .nav-item-dropdown details {
+                    width: 100% !important;
+                    height: auto !important;
+                    padding: 0 !important;
+                    margin-right: 0 !important;
+                    font-size: 1.2rem !important;
+                }
+
+                .nav-item-dropdown summary {
+                    height: auto !important;
+                    padding: 20px 0 !important;
+                    border-bottom: 1px solid #222 !important;
+                }
+
+                .site-nav-links > a {
+                    padding: 20px 0 !important;
+                    border-bottom: 1px solid #222 !important;
+                }
+
+                .dropdown-menu {
+                    position: static !important;
+                    box-shadow: none !important;
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    border: none !important;
+                    padding: 0 !important;
+                    margin: 10px 0 !important;
+                    border-radius: 8px !important;
+                    width: 100% !important;
+                }
+
+                .dropdown-menu a {
+                    color: #FFFFFF !important;
+                    padding: 16px 20px !important;
+                    border-bottom: 1px solid #222 !important;
+                }
+
+                .dropdown-menu a div {
+                    color: #FFFFFF !important;
+                }
+
+                .dropdown-menu a span, 
+                .dropdown-menu a div:last-child {
+                    color: #A0A0A0 !important;
+                }
+            }
+
+
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var toggle = document.getElementById('mobile-nav-toggle');
+                var links = document.getElementById('site-nav-links');
+                
+                if (toggle && links) {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (links.classList.contains('show')) {
+                            links.classList.remove('show');
+                        } else {
+                            links.classList.add('show');
+                        }
+                    });
+                }
+
+
+            });
+        </script>
+
+        <div class="container flash-container" style="padding-top: 24px;">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="flash flash-{{ label }}">
+                        <div class="flash-icon">
+                            {% if label == 'success' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            {% else %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            {% endif %}
+                        </div>
+                        <div class="flash-message">{{ message }}</div>
+                        <button class="flash-close" onclick="this.parentElement.style.display='none'">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+            
+        {% block body %}{% endblock %}
+
+        <div id="cookie-consent" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #151515; color: white; padding: 24px; z-index: 10000; display: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.4); border-top: 2px solid #EE0000;">
+            <div class="container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+                <div style="flex: 1; min-width: 300px;">
+                    <p style="margin: 0; font-size: 1rem; line-height: 1.5;">
+                        {{ site_setting('cookie_text', 'This website uses cookies to ensure you get the best experience on our website.') }}
+                        <a href="{{ site_setting('legal_privacy_url', '#') }}" style="color: #66b2ff; text-decoration: underline; margin-left: 8px;">Learn more</a>
+                    </p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button id="cookie-accept" class="btn btn-primary" style="padding: 10px 24px;">{{ site_setting('cookie_accept_btn', 'Accept All') }}</button>
+                    <button id="cookie-reject" class="btn btn-secondary" style="background: transparent; border: 1px solid white; color: white; padding: 10px 24px;">{{ site_setting('cookie_reject_btn', 'Reject') }}</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!localStorage.getItem('cookieCheck')) {
+                    document.getElementById('cookie-consent').style.display = 'block';
+                }
+                
+                document.getElementById('cookie-accept').addEventListener('click', function() {
+                    localStorage.setItem('cookieCheck', 'accepted');
+                    document.getElementById('cookie-consent').style.display = 'none';
+                });
+
+                document.getElementById('cookie-reject').addEventListener('click', function() {
+                    localStorage.setItem('cookieCheck', 'rejected');
+                    document.getElementById('cookie-consent').style.display = 'none';
+                });
+
+                // Scroll Reveal Animation
+                const revealCallback = (entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                            observer.unobserve(entry.target); // Stop observing once revealed
+                        }
+                    });
+                };
+                const revealObserver = new IntersectionObserver(revealCallback, { 
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px' // Reveal slightly before it enters viewport
+                });
+                document.querySelectorAll('.reveal-up, .stagger-reveal').forEach(el => revealObserver.observe(el));
+            });
+        </script>
+
+        <footer class="pt-footer">
+            <div class="pt-footer-container">
+                <div class="footer-content">
+                    {# Social links #}
+                    <div class="pt-footer-social">
+                        {% if site_setting('social_github') %}
+                             <a href="{{ site_setting('social_github') }}" target="_blank">GitHub</a>
+                        {% endif %}
+                        {% if site_setting('social_gitlab') %}
+                             <a href="{{ site_setting('social_gitlab') }}" target="_blank">GitLab</a>
+                        {% endif %}
+                        {% if site_setting('social_discord') %}
+                             <a href="{{ site_setting('social_discord') }}" target="_blank">Discord</a>
+                        {% endif %}
+                        {% if site_setting('social_twitter') %}
+                             <a href="{{ site_setting('social_twitter') }}" target="_blank">X (Twitter)</a>
+                        {% endif %}
+                    </div>
+
+                    {# Downloads Portal #}
+                    <div class="pt-footer-downloads">
+                        {% set download_products = get_all_products() %}
+                        {% for p in download_products %}
+                            {% if p.productType != 'library' %}
+                                <a href="{{ path('app_product_download', {'slug': p.slug}) }}">Download {{ p.title }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {# Legal Links #}
+                    <div class="pt-footer-legal">
+                         {% if site_setting('legal_tos_url') %}
+                            <a href="{{ site_setting('legal_tos_url') }}">{{ site_setting('footer_legal_tos_label', 'Terms of Service') }}</a>
+                        {% endif %}
+                         {% if site_setting('legal_privacy_url') %}
+                            <a href="{{ site_setting('legal_privacy_url') }}">{{ site_setting('footer_legal_privacy_label', 'Privacy Policy') }}</a>
+                        {% endif %}
+                        <a href="{{ path('app_branding') }}">Branding</a>
+                        <a href="{{ path('app_trademark') }}">Trademark</a>
+                        <a href="{{ path('app_status') }}" class="pt-footer-status">System Status</a>
+                    </div>
+
+                    <p class="pt-footer-copyright">&copy; {{ "now"|date("Y") }} {{ site_setting('footer_text', 'Project Tick')|raw }}</p>
+                </div>
+            </div>
+
+            <div class="pt-footer-bg-project">
+                Project
+            </div>
+            <div class="pt-footer-bg-tick">
+                Tick
+            </div>
+        </footer>
+
+    </body>
+</html>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Project Tick</title>
+    <subtitle>Project Tick News</subtitle>
+    <link href="{{ url('app_feed_main') }}" rel="self"/>
+    <link href="{{ url('app_home') }}"/>
+    <updated>{{ news|length > 0 ? news[0].date|date('c') : "now"|date('c') }}</updated>
+    <id>{{ url('app_home') }}</id>
+    <author>
+        <name>Project Tick Team</name>
+    </author>
+    {% for post in news %}
+    <entry>
+        <title>{{ post.title|escape('html') }}</title>
+        <link href="{{ url('app_news_show', {'slug': post.slug}) }}"/>
+        <updated>{{ post.date|date('c') }}</updated>
+        <id>{{ url('app_news_show', {'slug': post.slug}) }}</id>
+        <content type="html"><![CDATA[{{ post.content|markdown_to_html|html_to_absolute_urls|raw }}]]></content>
+    </entry>
+    {% endfor %}
+</feed>

@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page Not Found (404) - Project Tick{% endblock %}
+
+{% block body %}
+<div style="background: var(--pt-black-900); min-height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding: 40px; border-top: 4px solid var(--pt-red);">
+    <div style="max-width: 600px;">
+        <div style="display: inline-block; padding: 12px 24px; border: 2px solid var(--pt-red); font-family: var(--font-display); font-weight: 900; font-size: 1.5rem; margin-bottom: 32px; background: rgba(238, 0, 0, 0.05); clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);">
+            ERROR 404
+        </div>
+        
+        <h1 style="font-family: var(--font-display); font-size: 3.5rem; margin-bottom: 16px; letter-spacing: -1px;">Signal Interrupted</h1>
+        
+        <p style="color: var(--pt-gray-300); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+            The data packet you requested could not be found within the Project Tick database. The address may have been decommissioned or moved to a restricted sector.
+        </p>
+
+        <div style="display: flex; gap: 16px; justify-content: center;">
+            <a href="{{ path('app_home') }}" class="btn btn-primary" style="padding: 14px 40px;">Return to Hub</a>
+            <a href="{{ path('app_handbook') }}" class="btn btn-secondary" style="border-color: #444; color: white;">View Handbook</a>
+        </div>
+
+        <div style="margin-top: 60px; font-size: 0.8rem; color: #444; font-family: monospace; letter-spacing: 1px;">
+            DECRYPTION: STATUS_NOT_FOUND // TRACE_ID: {{ "now"|date("U") }}
+        </div>
+    </div>
+</div>
+{% endblock %}

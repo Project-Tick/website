@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forge - Project Tick{% endblock %}
+
+{% block body %}
+<div class="forge-hero" style="background: linear-gradient(135deg, #000 0%, #1a1a1a 100%); padding: 120px 0; color: white; position: relative; overflow: hidden; border-bottom: 2px solid #EE0000;">
+    {# Abstract Background Elements #}
+    <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(238,0,0,0.1) 0%, transparent 70%);"></div>
+    <div style="position: absolute; bottom: -50px; left: -50px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(238,0,0,0.05) 0%, transparent 70%);"></div>
+
+    <div class="container" style="position: relative; z-index: 2; text-align: center;">
+        <div style="display: inline-block; background: rgba(238, 0, 0, 0.1); border: 1px solid rgba(238, 0, 0, 0.3); padding: 8px 20px; border-radius: 40px; color: #EE0000; font-weight: 800; font-family: var(--font-display); letter-spacing: 0.1em; font-size: 0.8rem; margin-bottom: 24px; text-transform: uppercase;">
+            Open Infrastructure
+        </div>
+        <h1 style="color: #FFFFFF !important; font-family: var(--font-display); font-size: 4.5rem; font-weight: 900; line-height: 1; margin-bottom: 32px; letter-spacing: -0.04em;">
+            Project Tick <span style="color: #EE0000;">Forge</span>
+        </h1>
+        <p style="color: #CCCCCC !important; font-size: 1.4rem; max-width: 800px; margin: 0 auto 48px; line-height: 1.6; font-family: var(--font-text);">
+            Explore our self-hosted collaboration platform where independence meets innovation. Our forge powers the next generation of open-source development.
+        </p>
+        
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <a href="https://git.projecttick.org" class="btn btn-primary" style="padding: 18px 48px; font-size: 1.1rem; border-radius: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                Go to Forge
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="padding: 100px 0;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+        {# Benefit 1 #}
+        <div class="benefit-card" style="padding: 40px; background: var(--pt-white); border: 1px solid var(--border-color); transition: all 0.3s;" onmouseenter="this.style.borderColor='var(--pt-red)'; this.style.transform='translateY(-10px)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">
+            <div style="width: 60px; height: 60px; background: var(--pt-red-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EE0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 style="color: #111; font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 16px;">Sovereign Code</h3>
+            <p style="color: #444; line-height: 1.6;">We host our own code on our own infrastructure. No third-party lock-in, just pure open-source freedom and security for all Project Tick initiatives.</p>
+        </div>
+
+        {# Benefit 2 #}
+        <div class="benefit-card" style="padding: 40px; background: var(--pt-white); border: 1px solid var(--border-color); transition: all 0.3s;" onmouseenter="this.style.borderColor='var(--pt-red)'; this.style.transform='translateY(-10px)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">
+            <div style="width: 60px; height: 60px; background: #fdf2f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EE0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3 style="color: #111; font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 16px;">High Availability</h3>
+            <p style="color: #444; line-height: 1.6;">Optimized for speed and reliability. Our forge is globally accessible, ensuring your contribution workflow remains smooth and uninterrupted.</p>
+        </div>
+
+        {# Benefit 3 #}
+        <div class="benefit-card" style="padding: 40px; background: var(--pt-white); border: 1px solid var(--border-color); transition: all 0.3s;" onmouseenter="this.style.borderColor='var(--pt-red)'; this.style.transform='translateY(-10px)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.transform='translateY(0)'">
+            <div style="width: 60px; height: 60px; background: #fdf2f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EE0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3 style="color: #111; font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 16px;">Community Driven</h3>
+            <p style="color: #444; line-height: 1.6;">Built by creators for creators. Join projects, fork repositories, and collaborate with like-minded developers in an environment designed for transparency.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    body.dark-theme .benefit-card {
+        background: #111 !important;
+        border-color: #222 !important;
+    }
+    body.dark-theme .benefit-card h3 {
+        color: white !important;
+    }
+    body.dark-theme .benefit-card p {
+        color: #aaa !important;
+    }
+</style>
+{% endblock %}

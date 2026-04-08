@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage License Categories{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+        <div>
+            <h1>Manage License Categories</h1>
+            <p>Define how licenses are grouped on the public site.</p>
+        </div>
+        <a href="{{ path('app_admin_license_categories_new') }}" class="btn btn-primary">Create New Category</a>
+    </div>
+    
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Licenses</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td><code>{{ category.displayOrder }}</code></td>
+                    <td style="font-weight: bold;">{{ category.name }}</td>
+                    <td>{{ category.description|slice(0, 50) }}...</td>
+                    <td>
+                        <span style="background: var(--pt-gray-200); padding: 4px 8px; font-size: 0.8rem; font-weight: bold;">
+                            {{ category.licenses|length }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 12px;">
+                            <a href="{{ path('app_admin_license_categories_edit', {id: category.id}) }}" class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No categories found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <a href="{{ path('app_admin_licenses') }}" class="btn btn-secondary">&larr; Back to Licenses</a>
+    </div>
+</div>
+{% endblock %}

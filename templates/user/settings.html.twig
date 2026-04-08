@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div style="margin-bottom: 40px;">
+        <h1 style="margin-top: 0;">Account Settings</h1>
+        <p>Manage your profile and security preferences.</p>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 2fr 1fr;">
+        <div>
+            <!-- Profile Settings -->
+            <div class="card" style="margin-bottom: 32px;">
+                <h3>Profile Information</h3>
+                {{ form_start(formProfile, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                    
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            {% if user.avatar %}
+                                <img src="{{ asset('uploads/avatars/' ~ user.avatar) }}" width="64" height="64" style="border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                            {% else %}
+                                <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ user.username ?: user.email }}" width="64" height="64" style="border-radius: 50%; border: 1px solid var(--border-color); background: var(--pt-gray-200);">
+                            {% endif %}
+                            <div>
+                                {{ form_widget(formProfile.avatar, {'attr': {'class': 'form-control', 'style': 'width: auto; display: inline-block;'}}) }}
+                                <small class="form-text text-muted" style="display: block;">JPG, PNG or WEBP. Max 2MB.</small>
+                                {{ form_errors(formProfile.avatar) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(formProfile.username) }}
+                        {{ form_widget(formProfile.username) }}
+                        {{ form_help(formProfile.username) }}
+                        {{ form_errors(formProfile.username) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(formProfile.biography) }}
+                        {{ form_widget(formProfile.biography) }}
+                        {{ form_errors(formProfile.biography) }}
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+                         <div class="form-group">
+                            {{ form_label(formProfile.country) }}
+                            {{ form_widget(formProfile.country) }}
+                            {{ form_errors(formProfile.country) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(formProfile.timezone) }}
+                            {{ form_widget(formProfile.timezone) }}
+                            {{ form_errors(formProfile.timezone) }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 16px;">Save Profile</button>
+                {{ form_end(formProfile) }}
+            </div>
+
+            <!-- Email Address Settings -->
+            <div class="card" style="margin-bottom: 32px;">
+                <h3>Email Address</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Your current email address is <strong>{{ user.email }}</strong></p>
+                
+                <form action="{{ path('app_user_email_change_request') }}" method="POST">
+                    <input type="hidden" name="_token" value="{{ csrf_token('request_email_change') }}">
+                    <div class="form-group">
+                        <label for="new_email">New Email Address</label>
+                        <input type="email" name="email" id="new_email" class="form-control" required placeholder="new@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="current_password_email">Confirm with Password</label>
+                        <input type="password" name="current_password" id="current_password_email" class="form-control" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-secondary" style="margin-top: 8px;">Request Email Change</button>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 12px;">We will send a confirmation link to your new email address.</p>
+                </form>
+            </div>
+
+            <!-- Connected Accounts -->
+            <div class="card" style="margin-bottom: 32px;">
+                <h3>Connected Accounts</h3>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    {% if user.githubUsername %}
+                         <div style="padding: 16px; background: var(--pt-gray-100); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; border-radius: 4px;">
+                            <svg height="24" viewBox="0 0 16 16" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                            <div>
+                                <strong style="color: var(--text-primary);">GitHub</strong><br>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Connected as {{ user.githubUsername }}</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('connect_github_start') }}" class="btn btn-secondary" style="background: var(--pt-gray-200); border: none; color: var(--text-primary);">Connect GitHub</a>
+                    {% endif %}
+
+                    {% if user.gitlabUsername %}
+                         <div style="padding: 16px; background: var(--pt-gray-100); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; border-radius: 4px;">
+                            <svg height="24" viewBox="0 0 512 512" width="24"><path fill="#fc6d26" d="M26.21 202.9l19.8 60.97h136.6l-57.7-177.5c-4.14-12.75-22.18-12.75-26.32 0L26.21 202.9zM429.4 60.99c-4.14-12.75-22.18-12.75-26.32 0l-57.7 177.5h136.6l19.8-60.97-72.38-222.8z"></path><path fill="#e24329" d="M26.21 202.9h372.9L228.6 476.3 26.21 202.9z"></path></svg>
+                            <div>
+                                <strong style="color: var(--text-primary);">GitLab</strong><br>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Connected as {{ user.gitlabUsername }}</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('connect_gitlab_start') }}" class="btn btn-secondary" style="background: var(--pt-gray-200); border: none; color: var(--text-primary);">Connect GitLab</a>
+                    {% endif %}
+
+                    {% if user.microsoftId %}
+                         <div style="padding: 16px; background: var(--pt-gray-100); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; border-radius: 4px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Xbox_one_logo.svg" width="24" height="24" alt="Xbox">
+                            <div>
+                                <strong style="color: var(--text-primary);">Microsoft / Xbox</strong><br>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Account Linked ({{ user.minecraftUuid ? 'Minecraft Enabled' : 'No Minecraft' }})</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('connect_microsoft_start') }}" class="btn btn-secondary" style="background: var(--pt-gray-200); border: none; color: var(--text-primary);">Connect Microsoft/Xbox</a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <div>
+            <!-- Security -->
+            <div class="card" style="margin-bottom: 32px;">
+                <h3>Security</h3>
+                {% if user.password %}
+                    {{ form_start(formPassword) }}
+                        <div class="form-group">
+                            {{ form_label(formPassword.currentPassword) }}
+                            {{ form_widget(formPassword.currentPassword) }}
+                            {{ form_errors(formPassword.currentPassword) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(formPassword.newPassword.first) }}
+                            {{ form_widget(formPassword.newPassword.first) }}
+                            {{ form_errors(formPassword.newPassword.first) }}
+                        </div>
+                         <div class="form-group">
+                            {{ form_label(formPassword.newPassword.second) }}
+                            {{ form_widget(formPassword.newPassword.second) }}
+                            {{ form_errors(formPassword.newPassword.second) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Change Password</button>
+                    {{ form_end(formPassword) }}
+                {% else %}
+                    <div class="notification type-info">
+                        You signed in using a social account and don't have a password set. You can set one by using "Forgot Password" on login if you add an email.
+                    </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Danger Zone -->
+            <div class="card" style="border-color: var(--pt-red); background: rgba(255, 0, 60, 0.05);">
+                <h3 style="color: var(--pt-red);">Danger Zone</h3>
+                <p style="font-size: 0.9rem; color: var(--text-primary);">Once you delete your account, there is no going back. Please be certain.</p>
+                <form action="{{ path('app_user_delete') }}" method="post" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_account') }}">
+                    <button type="submit" class="btn btn-primary" style="background: var(--pt-red); border-color: var(--pt-red); width: 100%;">Delete Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

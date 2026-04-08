@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New License{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="max-width: 800px;">
+        <h1>Create New License</h1>
+        <p class="mb-4">Add a new legal instrument to the Project Tick ecosystem.</p>
+        
+        <div class="card">
+            {{ form_start(form) }}
+                <div class="form-group">
+                    <label class="form-label">License Name</label>
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'e.g. PT General Public License'}}) }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Slug</label>
+                    {{ form_widget(form.slug, {'attr': {'class': 'form-control', 'placeholder': 'e.g. PT-GPL-2.0'}}) }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    {{ form_widget(form.licenseCategory, {'attr': {'class': 'form-control'}}) }}
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label class="form-label">SPDX Identifier (Optional)</label>
+                        {{ form_widget(form.spdxIdentifier, {'attr': {'class': 'form-control', 'placeholder': 'e.g. GPL-2.0-only'}}) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Usage Documentation (Optional)</label>
+                    {{ form_widget(form.usageDocumentation, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Enter suggested usage guidelines...'}}) }}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Legal Content (Raw Text)</label>
+                    {{ form_widget(form.content, {'attr': {'class': 'form-control font-monospace', 'rows': 20}}) }}
+                </div>
+                
+                <div class="admin-card-actions">
+                    <button type="submit" class="btn btn-primary">Save License</button>
+                    <a href="{{ path('app_admin_licenses') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Licenses{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+        <div>
+            <h1>Manage Licenses</h1>
+            <p>Administer the Project Tick licensing ecosystem.</p>
+        </div>
+        <a href="{{ path('app_admin_licenses_new') }}" class="btn btn-primary">Create New License</a>
+    </div>
+    
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>SPDX ID</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for license in licenses %}
+                <tr>
+                    <td style="font-weight: bold;">{{ license.name }}</td>
+                    <td><code>{{ license.slug }}</code></td>
+                    <td>
+                        {% if license.spdxIdentifier %}
+                            <code style="color: var(--pt-red);">{{ license.spdxIdentifier }}</code>
+                        {% else %}
+                            <span style="color: #ccc;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="background: var(--pt-gray-200); padding: 4px 8px; font-size: 0.8rem; font-weight: bold;">
+                            {{ license.licenseCategory.name ?? 'Uncategorized' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 12px;">
+                            <a href="{{ path('app_admin_licenses_edit', {id: license.id}) }}" class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">Edit</a>
+                            <a href="{{ path('app_licenses_show', {slug: license.slug}) }}" target="_blank" class="btn btn-ghost" style="padding: 4px 0; font-size: 0.8rem;">Preview</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No licenses found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

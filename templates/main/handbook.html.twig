@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ site_setting('nav_handbook_label', 'Handbook') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+
+{% block body %}
+  <div style="background: var(--pt-black); color: white; padding: 60px 0; margin-bottom: 40px; text-align: center; border-bottom: 4px solid var(--pt-red);">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 16px;">{{ site_setting('handbook_title', 'Project Tick Handbook') }}</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 700px; margin: 0 auto 32px;">
+          {{ site_setting('handbook_subtitle', 'The central knowledge base for developers, contributors, and users.') }}
+        </p>
+        
+        <div style="max-width: 600px; margin: 0 auto; position: relative;">
+            <form action="{{ path('app_handbook_search') }}" method="get">
+                <input type="text" name="q" value="{{ search_query|default('') }}" placeholder="{{ site_setting('handbook_search_placeholder', 'Search documentation...') }}" style="width: 100%; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; font-family: var(--font-text);">
+            </form>
+        </div>
+    </div>
+  </div>
+
+  <div class="container">
+    {% if search_results is defined %}
+        <div style="margin-bottom: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid var(--pt-gray-300); padding-bottom: 12px;">
+                <h2 style="margin: 0;">{{ site_setting('handbook_search_results_title', 'Search Results for') }} "{{ search_query }}"</h2>
+                <a href="{{ path('app_handbook') }}" style="color: var(--pt-red); font-weight: bold;">{{ site_setting('handbook_search_clear', 'Clear Search') }}</a>
+            </div>
+
+            {% if search_results is empty %}
+                <div style="text-align: center; padding: 60px; background: var(--pt-gray-100);">
+                    <p style="font-size: 1.2rem; color: var(--pt-gray-600);">{{ site_setting('handbook_no_results', 'No results found matching your query.') }}</p>
+                </div>
+            {% else %}
+                <div class="grid">
+                    {% for entry in search_results %}
+                        <div class="card">
+                            <h3 style="color: var(--pt-red);">
+                                <a href="{{ path('app_handbook_show', {'slug': entry.slug}) }}" style="color: inherit; text-decoration: none;">
+                                    {{ entry.title }}
+                                </a>
+                            </h3>
+                            <div style="font-size: 0.85rem; color: var(--pt-gray-500); margin-bottom: 8px; font-family: monospace;">
+                                /{{ entry.slug }}
+                            </div>
+                            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                                {{ entry.content|striptags|slice(0, 150) }}...
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div style="margin-bottom: 40px;">
+            <h2 style="border-bottom: 2px solid var(--pt-gray-300); padding-bottom: 12px; margin-bottom: 24px;">{{ site_setting('handbook_areas_title', 'Documentation Areas') }}</h2>
+            
+            {% if tree is empty %}
+                <div style="text-align: center; padding: 60px; background: var(--pt-gray-100);">
+                    <p style="font-size: 1.2rem; color: var(--pt-gray-600);">No handbook entries found yet.</p>
+                    <p>Start by adding content in the Admin Panel.</p>
+                </div>
+            {% else %}
+                <div class="grid">
+                    {% for key, node in tree %}
+                        <div class="card" style="transition: transform 0.2s, box-shadow 0.2s;">
+                            <h3 style="color: var(--pt-red); text-transform: capitalize;">
+                                {% if node._entry %}
+                                    <a href="{{ path('app_handbook_show', {'slug': node._entry.slug}) }}" style="color: inherit; text-decoration: none;">
+                                        {{ node._entry.title }}
+                                    </a>
+                                {% else %}
+                                    {{ key }}
+                                {% endif %}
+                            </h3>
+                            
+                            {% if node._entry and node._entry.content %}
+                                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 16px;">
+                                    {{ node._entry.content|striptags|slice(0, 100) }}...
+                                </p>
+                            {% endif %}
+
+                            {% if node._children is not empty %}
+                                <div style="margin-top: auto; border-top: 1px solid var(--pt-gray-200); padding-top: 12px;">
+                                    <span style="font-size: 0.85rem; font-weight: bold; color: var(--pt-gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Sections</span>
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                        {% for child_key, child in node._children|slice(0, 4) %}
+                                            <li style="margin-bottom: 4px;">
+                                                <a href="{{ path('app_handbook_show', {'slug': child._entry ? child._entry.slug : key ~ '/' ~ child_key}) }}" style="font-size: 0.9rem; color: var(--link-color);">
+                                                    &rsaquo; {{ child._entry ? child._entry.title : child_key|capitalize }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                        {% if node._children|length > 4 %}
+                                            <li><span style="font-size: 0.85rem; color: var(--pt-gray-500);">+ {{ node._children|length - 4 }} more pages</span></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            <div style="margin-top: 16px;">
+                                <a href="{{ path('app_handbook_show', {'slug': node._entry ? node._entry.slug : key}) }}" class="btn btn-secondary" style="width: 100%;">Browse Section</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div style="background: var(--pt-gray-100); padding: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <h3 style="margin-top: 0;">{{ site_setting('handbook_cta_title', 'Use the Navigation Tree') }}</h3>
+            <p style="margin-bottom: 0; max-width: 500px;">
+                {{ site_setting('handbook_cta_body', 'Once you enter a section, use the sidebar navigation tree to explore deeper into the documentation hierarchy.') }}
+            </p>
+        </div>
+    </div>
+  </div>
+{% endblock %}

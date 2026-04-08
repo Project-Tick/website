@@ -1,0 +1,23 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "ProjT Launcher",
+  "language": "en",
+  "home_page_url": "{{ url('app_launcher') }}",
+  "feed_url": "{{ url('app_feed_launcher_json') }}",
+  "description": "An Open Source Minecraft launcher with the ability to manage multiple instances, accounts and mods. Focused on user freedom and free redistributability.",
+  "author": {
+    "name": "YongDo-Hyun",
+    "url": "{{ url('app_about') }}"
+  },
+  "items": [
+    {% for post in news %}
+    {
+      "id": "{{ url('app_news_show', {'slug': post.slug}) }}",
+      "url": "{{ url('app_news_show', {'slug': post.slug}) }}",
+      "title": {{ post.title|json_encode|raw }},
+      "content_html": {{ post.content|markdown_to_html|html_to_absolute_urls|json_encode|raw }},
+      "date_published": "{{ post.date|date('c') }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}

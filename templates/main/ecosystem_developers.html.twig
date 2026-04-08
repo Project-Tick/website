@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ site_setting('ecosystem_dev_title', 'Developer Documentation') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+
+{% block body %}
+<div class="hero" style="padding: 60px 0; background: #000; text-align: center; color: white; border-bottom: 4px solid var(--pt-red);">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 16px;">{{ site_setting('ecosystem_dev_title', 'Developer Portal') }}</h1>
+        <p style="font-size: 1.1rem; color: #D2D2D2; max-width: 800px; margin: 0 auto;">
+            {{ site_setting('ecosystem_dev_subtitle', 'Official technical guides for integrating Tick ID and Project Tick Licensing into your software.') }}
+        </p>
+    </div>
+</div>
+
+<div class="container" style="padding: 60px 0;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 48px;">
+        {# Sidebar #}
+        <aside style="position: sticky; top: 100px; height: fit-content;">
+            <nav style="display: flex; flex-direction: column; gap: 4px;">
+                {% if entries %}
+                    {% for entry in entries %}
+                        <a href="#section-{{ entry.id }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; padding: 10px 16px; border-radius: 6px; transition: all 0.2s;">{{ entry.title }}</a>
+                    {% endfor %}
+                {% else %}
+                    <a href="#tick-id" style="color: var(--text-primary); text-decoration: none; font-weight: 600; padding: 10px 16px; border-radius: 6px; background: var(--pt-gray-100);">Tick ID (Unified Auth)</a>
+                    <a href="#license-api" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; padding: 10px 16px; border-radius: 6px;">Licensing Core</a>
+                    <a href="#security" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; padding: 10px 16px; border-radius: 6px;">Security & JWT</a>
+                {% endif %}
+            </nav>
+        </aside>
+
+        {# Content #}
+        <div class="prose" style="max-width: 100%;">
+            {% if entries %}
+                {% for entry in entries %}
+                    <section id="section-{{ entry.id }}" style="margin-bottom: 80px;">
+                        <h2 style="font-size: 2.2rem; color: var(--pt-red); border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">{{ entry.title }}</h2>
+                        <div class="doc-content">
+                            {{ entry.content|raw }}
+                        </div>
+                    </section>
+                {% endfor %}
+            {% else %}
+                <div class="alert-box" style="margin-bottom: 40px; padding: 20px; background: var(--pt-gray-100); border-left: 4px solid var(--pt-red);">
+                    <strong>Admin Note:</strong> You can manage this content by adding items to the <strong>Handbook</strong> with the category <strong>'Developer'</strong>. Default content is shown below.
+                </div>
+                
+                <section id="tick-id" style="margin-bottom: 80px;">
+                    <h2 style="font-size: 2.2rem; color: var(--pt-red); border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">Tick ID: Unified Authentication</h2>
+                    <p>Tick ID allows your users to log in to your external services using their Project Tick account.</p>
+                    <pre style="background: #111; color: #fff; padding: 20px; border-radius: 8px; font-family: monospace;">GET /api/identity/token</pre>
+                </section>
+
+                <section id="license-api" style="margin-bottom: 80px;">
+                    <h2 style="font-size: 2.2rem; color: var(--pt-red); border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">Project Tick Licensing Core</h2>
+                    <p>Integrate Project Tick's specialized licensing rules directly into your delivery systems.</p>
+                    <pre style="background: #111; color: #fff; padding: 20px; border-radius: 8px; font-family: monospace;">POST /api/license/verify</pre>
+                </section>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .doc-content pre { background: #111; color: #fff; padding: 20px; border-radius: 8px; font-family: monospace; overflow-x: auto; margin: 20px 0; }
+    .doc-content code { background: rgba(238, 0, 0, 0.1); color: var(--pt-red); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+    body.dark-theme h2, body.dark-theme h3 { color: white !important; }
+    body.dark-theme p, body.dark-theme li { color: #ccc !important; }
+    body.dark-theme aside a { color: #ddd !important; }
+    body.dark-theme aside a:hover { background: var(--pt-gray-200); }
+    body.dark-theme .prose section { border-color: #333 !important; }
+</style>
+{% endblock %}

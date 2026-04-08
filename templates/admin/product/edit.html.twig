@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Product - Admin{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header reveal-up">
+        <h1>Edit Product <span class="admin-breadcrumb">/ {{ product.title }}</span></h1>
+        {{ include('admin/product/_delete_form.html.twig') }}
+    </div>
+
+    <div class="card reveal-up" style="max-width: 900px; margin: 32px 0;">
+        {{ form_start(form) }}
+            <div class="stagger-reveal">
+                {{ form_widget(form) }}
+            </div>
+            
+            <div class="admin-card-actions">
+                <button class="btn btn-primary">{{ button_label|default('Save Changes') }}</button>
+                <a href="{{ path('app_admin_products_index') }}" class="btn btn-secondary">Discard Changes</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_admin_products_index') }}">&larr; Back to List</a>
+    </div>
+</div>
+{% endblock %}

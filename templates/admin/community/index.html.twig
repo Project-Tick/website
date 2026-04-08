@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Community - Admin{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header">
+        <h1>Community Hub <span class="admin-breadcrumb">/ Management</span></h1>
+        <div class="admin-header-actions">
+            <a href="{{ path('app_admin_community_category_new') }}" class="btn btn-primary">+ New Category</a>
+        </div>
+    </div>
+
+    <div class="grid mt-4" style="grid-template-columns: 1fr 3fr; gap: 24px;">
+        <!-- Categories List -->
+        <div class="card">
+            <h3>Categories</h3>
+            <ul style="list-style: none; padding: 0; margin-top: 16px;">
+                {% for cat in categories %}
+                    <li style="padding: 12px; border-bottom: 1px solid var(--pt-gray-200); display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ cat.name }}</span>
+                        <span class="badge" style="font-size: 0.7rem;">{{ cat.threads|length }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Recent Threads -->
+        <div class="card">
+            <h3>Recent Discussions</h3>
+            <div class="table-responsive mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for thread in threads %}
+                            <tr>
+                                <td>{{ thread.title }}</td>
+                                <td>{{ thread.author.githubUsername ?: thread.author.username }}</td>
+                                <td>{{ thread.category.name }}</td>
+                                <td>{{ thread.comments|length }}</td>
+                                <td>
+                                    <form action="{{ path('app_admin_community_thread_delete', {id: thread.id}) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure? This delete also all comments.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_thread' ~ thread.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

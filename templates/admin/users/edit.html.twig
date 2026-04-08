@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header">
+        <h1>Edit User <span class="admin-breadcrumb">/ Update Profil</span></h1>
+    </div>
+
+    <div class="card mt-4" style="max-width: 600px;">
+        {{ form_start(form) }}
+            <div class="form-group mb-4">
+                <label class="form-label" style="font-weight: 700;">Email Address</label>
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="form-group mb-5">
+                <label class="form-label" style="font-weight: 700;">Assigned Roles</label>
+                <div style="background: var(--pt-gray-100); padding: 16px; border-radius: 4px;">
+                    {{ form_widget(form.roles) }}
+                </div>
+                <small style="color: var(--text-secondary); display: block; margin-top: 8px;">Check the roles you want to grant to this user.</small>
+            </div>
+
+            <div style="display: flex; gap: 16px; align-items: center; border-top: 1px solid var(--pt-gray-200); pt-4; margin-top: 32px; padding-top: 24px;">
+                <button class="btn btn-primary">Save Changes</button>
+                <a href="{{ path('app_admin_users') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

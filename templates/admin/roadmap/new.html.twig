@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ item.id ? 'Edit' : 'New' }} Roadmap Item{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1>{{ item.id ? 'Edit Roadmap Item' : 'Create Roadmap Item' }}</h1>
+        <p class="mb-4">Internal goals and product roadmap.</p>
+        
+        <div class="card p-4">
+            <form method="POST">
+                <div class="form-group mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" name="title" value="{{ item.title }}" class="form-control" placeholder="e.g. Add Multi-Language Support" required>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="planned" {% if item.status == 'planned' %}selected{% endif %}>Planned</option>
+                            <option value="in-progress" {% if item.status == 'in-progress' %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if item.status == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Priority (Higher = Top)</label>
+                        <input type="number" name="priority" value="{{ item.priority ?: 0 }}" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" rows="5" class="form-control">{{ item.description }}</textarea>
+                </div>
+
+                <div class="admin-card-actions border-top pt-4">
+                    <button type="submit" class="btn btn-primary">{{ item.id ? 'Update Item' : 'Create Item' }}</button>
+                    <a href="{{ path('app_admin_roadmap') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

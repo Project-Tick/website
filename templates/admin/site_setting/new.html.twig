@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Site Setting{% endblock %}
+
+{% block body %}
+    <h1>Create new Site Setting</h1>
+
+    <div class="card" style="max-width: 800px; margin-top: 24px;">
+        {{ include('admin/site_setting/_form.html.twig') }}
+    </div>
+
+    <a href="{{ path('app_admin_settings_index') }}">back to list</a>
+{% endblock %}

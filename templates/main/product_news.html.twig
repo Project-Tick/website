@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}News - {{ product ? product.title : slug|capitalize }}{% endblock %}
+
+{% block body %}
+    <div style="background: var(--pt-black); color: white; padding: 60px 0; margin-bottom: 40px; text-align: center; border-bottom: 4px solid var(--pt-red);">
+        <div class="container">
+            <h1 style="color: white; font-size: 3rem; margin-bottom: 16px;">
+                {% if product %}
+                    {{ product.title }} News
+                {% else %}
+                    {{ slug|replace({'-': ' '})|title }} News
+                {% endif %}
+            </h1>
+            
+            {% if product %}
+                <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 700px; margin: 0 auto 32px;">{{ product.summary }}</p>
+            {% endif %}
+
+            <div style="max-width: 600px; margin: 0 auto; position: relative;">
+                <form action="{{ path('app_product_news_list', {'slug': slug}) }}" method="get">
+                    <input type="text" name="q" value="{{ search_query|default('') }}" placeholder="Search news for {{ product ? product.title : slug }}..." style="width: 100%; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; font-family: var(--font-text);">
+                    {% if search_query %}
+                        <a href="{{ path('app_product_news_list', {'slug': slug}) }}" style="position: absolute; right: 20px; top: 16px; color: var(--pt-gray-600); font-weight: bold;">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if search_query %}
+            <div style="margin-bottom: 32px; border-bottom: 2px solid var(--pt-gray-200); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;">Search Results for "{{ search_query }}"</h2>
+                <a href="{{ path('app_product_news_list', {'slug': slug}) }}" style="color: var(--pt-red); font-weight: bold;">Clear Search</a>
+            </div>
+        {% endif %}
+
+        {% if product %}
+            <div style="margin-bottom: 32px;">
+                 <a href="{{ path('app_product_feed', {'slug': slug}) }}" target="_blank" class="btn btn-secondary" style="background: transparent; border-color: #ddd; color: #666; padding: 6px 16px; font-size: 0.85rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+                    {{ product.title }} RSS Feed
+                 </a>
+            </div>
+        {% endif %}
+
+        {% if news_list is empty %}
+            <div style="text-align: center; padding: 80px; background: var(--pt-gray-100); border-radius: 4px;">
+                <p style="font-size: 1.2rem; color: var(--pt-gray-600);">{{ search_query ? 'No news found matching your search.' : 'No news updates found for this product yet.' }}</p>
+                {% if search_query %}
+                    <a href="{{ path('app_product_news_list', {'slug': slug}) }}" class="btn btn-primary" style="margin-top: 16px;">View All Product News</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="grid" style="grid-template-columns: 1fr;">
+                {% for news in news_list %}
+                    <article class="card">
+                        <div style="color: var(--pt-gray-600); font-size: 0.9rem; margin-bottom: 8px;">
+                            {{ news.date|date('F j, Y') }}
+                        </div>
+                        <h2 style="margin-top: 0; margin-bottom: 12px;">
+                            <a href="{{ path('app_product_news_show', {'slug': slug, 'newsSlug': news.slug}) }}" style="color: var(--pt-black); text-decoration: none;">
+                                {{ news.title }}
+                            </a>
+                        </h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                            {{ news.content|striptags|slice(0, 250) }}...
+                        </p>
+                        <a href="{{ path('app_product_news_show', {'slug': slug, 'newsSlug': news.slug}) }}" style="color: var(--pt-red); font-weight: bold; text-decoration: none;">
+                            Read Full Story &rarr;
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+</div>
+{% endblock %}

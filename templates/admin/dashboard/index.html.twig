@@ -1,0 +1,278 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div class="admin-header">
+        <h1>Admin Panel <span class="admin-breadcrumb">/ Overview</span></h1>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span class="badge" style="background: #333; color: #eee; font-family: monospace; font-size: 0.8rem; padding: 4px 10px; border-radius: 4px;">v{{ version }}</span>
+            {% if license_info.type in ['PRO', 'ENTERPRISE', 'SAAS', 'OFFICIAL'] %}
+                <span class="badge" style="background: #2E7D32; color: white; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">COMMERCIAL / {{ license_info.type }}</span>
+            {% else %}
+                <span class="badge" style="background: #1976D2; color: white; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">COMMUNITY EDITION</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if license_info.status == 'VERIFIED' %}
+        <div class="admin-alert admin-alert-success reveal-up">
+            <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
+            <div style="flex: 1;">
+                <strong>License Verified:</strong> {{ license_info.payload }}
+                <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">Type: {{ license_info.type }} | Expires: {{ license_info.year }}</div>
+            </div>
+        </div>
+    {% elseif license_info.status == 'OFFICIAL_INFRA' %}
+        <div class="admin-alert admin-alert-info reveal-up">
+            <i class="fas fa-server" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Verified Infrastructure:</strong> Running on Official Project Tick Server.
+            </div>
+        </div>
+    {% elseif license_info.status == 'COMMUNITY_MODE' or license_info.type == 'COMMUNITY' %}
+        <div class="admin-alert admin-alert-info reveal-up">
+            <i class="fas fa-users" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong style="font-size: 1.1rem;">Project Tick Community Edition</strong>
+                <p style="margin: 8px 0 0 0; font-size: 0.9em;">You are running the free and open-source edition. Advanced modules (Legal CLA Check, Uptime Monitor) are currently restricted. To unlock Enterprise tools, you need a valid RSA-signed <a href="https://projecttick.org" target="_blank" style="color: inherit; text-decoration: underline;">Commercial License Key</a>.</p>
+            </div>
+        </div>
+    {% elseif license_info.status == 'DEV_MODE' %}
+        <div class="admin-alert admin-alert-warning reveal-up">
+            <i class="fas fa-code" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Developer Mode:</strong> License checks bypassed.
+            </div>
+        </div>
+    {% else %}
+        <div class="admin-alert admin-alert-danger reveal-up">
+            <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>License Error:</strong> {{ license_info.status|replace({'_': ' '})|title }}
+            </div>
+        </div>
+    {% endif %}
+
+    {# Statistics Row #}
+    <div class="admin-stats-grid stagger-reveal">
+        <div class="stat-card" style="border-bottom: 4px solid var(--pt-red);">
+            <span class="label">Total Traffic</span>
+            <div class="value">{{ total_visits }}</div>
+            <div class="trend">Life-time page views</div>
+        </div>
+        <div class="stat-card" style="border-bottom: 4px solid #2E7D32;">
+            <span class="label">Last 24 Hours</span>
+            <div class="value">{{ recent_visits }}</div>
+            <div class="trend">Unique session traffic</div>
+        </div>
+        <div class="stat-card" style="border-bottom: 4px solid #1976D2;">
+            <span class="label">Content Items</span>
+            <div class="value">{{ news_count + handbook_count }}</div>
+            <div class="trend">News, Handbook & Updates</div>
+        </div>
+    </div>
+
+    {# Module Status Row #}
+    <div class="admin-header mt-5 reveal-up">
+        <h2>Module Status</h2>
+    </div>
+    <div class="admin-grid mt-3 stagger-reveal">
+        {% for name, enabled in modules %}
+            <div class="card" style="padding: 20px; border-left: 4px solid {{ enabled ? '#2E7D32' : '#D32F2F' }};">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-weight: 700; text-transform: capitalize; font-family: var(--font-display);">{{ name|replace({'_': ' '}) }}</span>
+                    <span class="status-pill {{ enabled ? 'status-active' : 'status-danger' }}">
+                        {{ enabled ? 'Active' : 'Disabled' }}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="grid mt-5 reveal-up" style="grid-template-columns: 1fr 1fr; gap: 32px;">
+        {# OS Distribution #}
+        <div class="card">
+            <h3 style="margin-bottom: 24px;">Operating Systems</h3>
+            <div class="stagger-reveal">
+                {% for stat in os_stats %}
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 500;">
+                            <span>{{ stat.os }}</span>
+                            <span style="color: var(--pt-gray-500);">{{ stat.count }}</span>
+                        </div>
+                        <div style="height: 6px; background: var(--pt-gray-100); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {{ total_visits > 0 ? (stat.count / total_visits * 100)|round : 0 }}%; height: 100%; background: var(--pt-red); transition: width 1s ease-out;"></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {# Browser Distribution #}
+        <div class="card">
+            <h3 style="margin-bottom: 24px;">Browsers</h3>
+            <div class="stagger-reveal">
+                {% for stat in browser_stats %}
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 500;">
+                            <span>{{ stat.browser }}</span>
+                            <span style="color: var(--pt-gray-500);">{{ stat.count }}</span>
+                        </div>
+                        <div style="height: 6px; background: var(--pt-gray-100); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {{ total_visits > 0 ? (stat.count / total_visits * 100)|round : 0 }}%; height: 100%; background: #1976D2; transition: width 1s ease-out;"></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-header mt-5">
+        <h2>Content Management</h2>
+    </div>
+
+    <div class="admin-grid mt-4">
+        <!-- Roadmap Card -->
+        <div class="card">
+            <h3>Project Roadmap</h3>
+            <p style="color: var(--text-secondary);">Manage planned features and releases.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_roadmap') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_roadmap_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        {# ... existing cards ... #}
+        <!-- Licenses Card -->
+        <div class="card">
+            <h3>Licenses</h3>
+            <p style="color: var(--text-secondary);">Total instruments: <strong>{{ license_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_licenses') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_licenses_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- News Card -->
+        <div class="card">
+            <h3>News & Updates</h3>
+            <p style="color: var(--text-secondary);">Total posts: <strong>{{ news_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_news') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_news_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- Handbook Card -->
+        <div class="card">
+            <h3>Handbook</h3>
+            <p style="color: var(--text-secondary);">Total pages: <strong>{{ handbook_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_handbook') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+                <a href="{{ path('app_admin_handbook_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New</a>
+            </div>
+        </div>
+
+        <!-- Developer Portal Card -->
+        <div class="card" style="border-left: 4px solid var(--pt-red); background: rgba(238, 0, 0, 0.02);">
+            <h3 style="color: var(--pt-red);">Developer Portal Docs</h3>
+            <p style="color: var(--text-secondary);">Manage technical & API guides.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_developer_portal') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; background: var(--pt-red); border: none;">Manage Portal</a>
+                <a href="{{ path('app_admin_developer_portal_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New Guide</a>
+            </div>
+        </div>
+
+        <!-- Products Card -->
+        <div class="card">
+            <h3>Products</h3>
+             <div class="admin-card-actions">
+                <a href="{{ path('app_admin_products_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+            </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="card">
+            <h3>User Directory</h3>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_users') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage</a>
+            </div>
+        </div>
+
+        <!-- Site Settings Card -->
+        <div class="card">
+            <h3>Site Settings</h3>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_settings_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage Settings</a>
+            </div>
+        </div>
+
+        <!-- Community Card -->
+        <div class="card">
+            <h3>Community</h3>
+            <p style="color: var(--text-secondary);">Total Threads: <strong>{{ community_count }}</strong></p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_community') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Manage Hub</a>
+                <a href="{{ path('app_admin_community_category_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ Category</a>
+            </div>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="card">
+            <h3>Documentation Feedback</h3>
+            <p style="color: var(--text-secondary);">
+                {{ feedback_helpful }} / {{ feedback_total }} helpful 
+                ({{ feedback_total > 0 ? (feedback_helpful / feedback_total * 100)|round : 0 }}%)
+            </p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_feedback') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">View Ratings</a>
+            </div>
+        </div>
+        <!-- Ecosystem Map Card -->
+        <div class="card" style="border-left: 4px solid #1976D2; background: rgba(25, 118, 210, 0.02);">
+            <h3 style="color: #1976D2;">Ecosystem Map</h3>
+            <p style="color: var(--text-secondary);">Manage interactive nodes & positions.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_ecosystem') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; background: #1976D2; border: none;">Manage Map</a>
+                <a href="{{ path('app_admin_ecosystem_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New Node</a>
+            </div>
+        </div>
+        <!-- App Showcase Card -->
+        <div class="card" style="border-left: 4px solid #9C27B0; background: rgba(156, 39, 176, 0.02);">
+            <h3 style="color: #9C27B0;">App Showcase</h3>
+            <p style="color: var(--text-secondary);">Highlight projects building on Tick.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_showcase') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; background: #9C27B0; border: none;">Manage Showcase</a>
+                <a href="{{ path('app_admin_showcase_new') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">+ New App</a>
+            </div>
+        </div>
+        <!-- License Key Gen Card -->
+        <div class="card" style="border-left: 4px solid #FF9800; background: rgba(255, 152, 0, 0.02);">
+            <h3 style="color: #FF9800;">Security Tools</h3>
+            <p style="color: var(--text-secondary);">manually issue encrypted license keys.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('app_admin_license_keys') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; background: #FF9800; border: none;">Key Generator</a>
+            </div>
+        </div>
+
+
+
+        <!-- Infrastructure Monitoring Card -->
+        <div class="card" style="border-left: 4px solid #EE0000; background: rgba(238, 0, 0, 0.05);">
+            <h3 style="color: #EE0000;">Infrastructure Monitoring</h3>
+            <p style="color: var(--text-secondary);">Uptime, heartbeats and health checks.</p>
+            <div class="admin-card-actions">
+                <a href="{{ path('admin_monitors_index') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem; background: #EE0000; border: none;">Manage Monitors</a>
+                <a href="{{ path('app_status') }}" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">Public Status</a>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+{% endblock %}

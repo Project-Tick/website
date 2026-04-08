@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div style="margin-bottom: 24px;">
+        <a href="{{ path('app_product_news_list', {'slug': product ? product.slug : app.request.get('slug')}) }}">&larr; Back to News</a>
+    </div>
+
+    <article class="card" style="max-width: 800px; margin: 0 auto;">
+        <header style="margin-bottom: 32px; border-bottom: 1px solid var(--pt-gray-200); padding-bottom: 24px;">
+            <h1 style="margin-bottom: 12px; font-size: 2.5rem;">{{ post.title }}</h1>
+            <div style="color: var(--pt-gray-600);">
+                Published on {{ post.date|date('F j, Y') }}
+                {% if product %}
+                     &bull; <span style="color: var(--pt-red);">{{ product.title }}</span>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="content" style="line-height: 1.8; font-size: 1.1rem;">
+            {{ post.content|markdown_to_html|raw }}
+        </div>
+    </article>
+</div>
+{% endblock %}

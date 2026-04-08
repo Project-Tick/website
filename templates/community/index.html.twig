@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Community Discussions - Project Tick{% endblock %}
+
+{% block body %}
+<div class="hero-section" style="padding: 60px 0; background: var(--pt-black-900); text-align: center; color: white;">
+    <div class="container">
+        <h1>Community Hub</h1>
+        <p class="lead" style="color: #D2D2D2;">Engage with the project ecosystem, report bugs, or suggest features.</p>
+    </div>
+</div>
+
+<div class="py-5" style="background: var(--pt-white);">
+    <div class="container">
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 40px; align-items: flex-start;">
+            
+            <div class="categories-list">
+                <h2 style="font-size: 1.5rem; border-bottom: 2px solid var(--pt-red); padding-bottom: 12px; margin-bottom: 24px;">Categories</h2>
+                {% for category in categories %}
+                    <div class="card mb-4" style="padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.25rem;">
+                                <a href="{{ path('app_community_category', {id: category.id}) }}" style="color: var(--pt-black); text-decoration: none;">{{ category.name }}</a>
+                            </h3>
+                            <p style="margin: 8px 0 0; font-size: 0.9rem; color: var(--text-secondary);">{{ category.description }}</p>
+                        </div>
+                        <div style="text-align: right; color: var(--pt-gray-500); font-size: 0.85rem;">
+                            <strong>{{ category.threads|length }}</strong> threads
+                        </div>
+                    </div>
+                {% else %}
+                    <p style="color: #888;">No categories available.</p>
+                {% endfor %}
+            </div>
+
+            <div class="recent-threads">
+                <h2 style="font-size: 1.25rem; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 24px;">Recent Discussions</h2>
+                {% for thread in recentThreads %}
+                    <div class="mb-3" style="padding-bottom: 16px; border-bottom: 1px solid var(--pt-gray-200);">
+                        <a href="{{ path('app_community_thread', {id: thread.id}) }}" style="font-weight: 600; color: var(--pt-black); text-decoration: none; display: block; margin-bottom: 4px;">{{ thread.title }}</a>
+                        <span style="font-size: 0.75rem; color: var(--pt-gray-500);">by {{ thread.author.username ?: thread.author.githubUsername }} in {{ thread.category.name }}</span>
+                    </div>
+                {% else %}
+                    <p style="color: #888; font-size: 0.9rem;">No recent threads found.</p>
+                {% endfor %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div style="margin-top: 32px; padding: 16px; background: #FFFEEB; border: 1px solid #FFE58F; border-radius: 4px; font-size: 0.85rem;">
+                        <strong>Admin Note:</strong> Use the Database to seed categories (e.g., Support, Suggestions, General).
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

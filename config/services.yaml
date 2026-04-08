@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Project Tick
+# SPDX-FileContributor: Project Tick
+
+# Copyright (c) 2026 Project Tick
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+# of the Software, and to permit persons to whom the Software is furnished to do
+# so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    github_token: '%env(default::GITHUB_TOKEN)%'
+    github_tokens: '%env(default::GITHUB_TOKENS)%'
+    gitlab_webhook_secret: '%env(default::GITLAB_WEBHOOK_SECRET)%'
+    bot_log_path: '%kernel.project_dir%/var/log/monitor.log'
+    license_secret: '%env(default::PROJT_LICENSE_SECRET)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Framework/'
+
+
+
+    App\Controller\GitlabWebhookController:
+        arguments:
+            $webhookSecret: '%gitlab_webhook_secret%'
+
+    App\Module\Monitor\UptimeService: ~
+
+    App\Service\GithubTokenBalancer:
+        arguments:
+            $appId: '%env(GITHUB_APP_ID)%'
+            $privateKey: '%env(GITHUB_PRIVATE_KEY)%'
+            $tokensList: '%github_tokens%'
+
+    App\Service\ModuleService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Controller\Admin\LicenseKeysGenController:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    Twig\Extension\StringLoaderExtension: ~
+

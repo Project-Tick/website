@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Project Tick Ecosystem Map{% endblock %}
+
+{% block body %}
+<div class="hero" style="padding: 80px 0 40px 0; background: var(--pt-black-900); text-align: center; color: white; position: relative; overflow: hidden;">
+    <div class="container" style="position: relative; z-index: 2;">
+        <h1 style="color: white; font-size: 3.5rem; margin-bottom: 16px;">The Ecosystem Map</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 800px; margin: 0 auto; margin-bottom: 32px;">
+            Explore the interconnected nodes of the Project Tick universe. From specialized licenses to modern delivery systems.
+        </p>
+        <a href="{{ path('app_ecosystem_developers') }}" class="btn btn-primary" style="background: var(--pt-red); border: none; padding: 12px 32px; font-weight: bold; border-radius: 4px; box-shadow: 0 4px 15px rgba(238, 0, 0, 0.3);">
+            Developer Documentation
+        </a>
+    </div>
+    {# Background Decoration #}
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-image: radial-gradient(var(--pt-red) 1px, transparent 1px); background-size: 30px 30px;"></div>
+</div>
+
+<div style="padding: 0; margin-top: 40px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="ecosystem-container" style="position: relative; height: 800px; background: #fafafa; width: 100%; overflow: hidden;">
+        
+        {# Connections (SVG) #}
+        {% if nodes|length > 1 %}
+        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+            <style>
+                @keyframes flow { to { stroke-dashoffset: -20; } }
+                .flow-line { stroke-dasharray: 10, 10; animation: flow 1s linear infinite; }
+            </style>
+            {% set centralNode = null %}
+            {% for node in nodes %}{% if node.type == 'central' %}{% set centralNode = node %}{% endif %}{% endfor %}
+            
+            {% if centralNode %}
+                {% for node in nodes %}
+                    {% if node.id != centralNode.id %}
+                        <line x1="{{ centralNode.positionX }}%" y1="{{ centralNode.positionY }}%" x2="{{ node.positionX }}%" y2="{{ node.positionY }}%" class="flow-line" stroke="#EE0000" stroke-width="1.5" opacity="0.4" />
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </svg>
+        {% endif %}
+
+        {# Dynamic Nodes from Database #}
+        {% for node in nodes %}
+        <div class="eco-node {{ node.type }}" style="position: absolute; top: {{ node.positionY }}%; left: {{ node.positionX }}%; transform: translate(-50%, -50%); z-index: {{ node.type == 'central' ? 10 : 5 }}; cursor: pointer;">
+            <div style="background: {{ node.type == 'central' ? 'var(--pt-red)' : '#151515' }}; 
+                        width: {{ node.type == 'central' ? '140px' : '100px' }}; 
+                        height: {{ node.type == 'central' ? '140px' : '100px' }}; 
+                        border-radius: {{ node.type == 'central' ? '50%' : '12px' }}; 
+                        display: flex; align-items: center; justify-content: center; color: white; 
+                        font-weight: 900; font-size: {{ node.type == 'central' ? '1.4rem' : '1rem' }}; 
+                        box-shadow: 0 0 {{ node.type == 'central' ? '40px rgba(255, 0, 60, 0.4)' : '15px rgba(0,0,0,0.1)' }}; 
+                        border: 3px solid white;">
+                {{ node.shortcut|upper }}
+            </div>
+            <div class="node-label" style="position: absolute; top: {{ node.type == 'central' ? '150px' : '110px' }}; left: 50%; transform: translateX(-50%); font-weight: bold; white-space: nowrap; color: var(--text-primary);">
+                {{ node.title }}
+            </div>
+            
+            {% if node.description %}
+            <div class="eco-info" style="display: none; position: absolute; {{ node.positionY < 50 ? 'top: 120%' : 'bottom: 120%' }}; left: 50%; transform: translateX(-50%); width: 280px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #eee;">
+                <h4 style="margin: 0 0 8px 0; color: var(--pt-red); font-size: 1rem;">{{ node.title }}</h4>
+                <p style="margin: 0; font-size: 0.95rem; color: #444; line-height: 1.5;">{{ node.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #888;">
+                <p>Ecosystem Map is currently being terraformed. Please check back later.</p>
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+<div class="container" style="padding: 40px 0;">
+
+    <div style="margin-top: 40px; text-align: center; color: #888;">
+        <p>Tip: Click or hover over nodes to explore their function within the ecosystem.</p>
+    </div>
+</div>
+
+<style>
+    .eco-node { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .eco-node:hover { transform: translate(-50%, -50%) scale(1.1) !important; z-index: 100 !important; }
+    .eco-node:hover .eco-info { display: block !important; }
+    
+    body.dark-theme .ecosystem-container { background: #080808; border-color: #1a1a1a; }
+    body.dark-theme svg line { stroke: #333; }
+    body.dark-theme .eco-info { background: #1a1a1a; border-color: #333; color: white; }
+    body.dark-theme .eco-info p { color: #aaa; }
+    body.dark-theme .node-label { color: white; }
+</style>
+{% endblock %}

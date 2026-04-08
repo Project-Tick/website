@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Download {{ product.title }} - Choose Platform{% endblock %}
+
+{% block body %}
+<style>
+    .download-card {
+        padding: 40px 32px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .download-card:hover {
+        transform: translateY(-5px);
+    }
+    .download-card p {
+        color: var(--text-secondary) !important;
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+        min-height: 48px;
+    }
+    .download-card h2 {
+        color: var(--text-primary) !important;
+        margin-bottom: 12px;
+    }
+    
+    body.dark-theme .apple-logo {
+        filter: invert(1);
+    }
+    
+    .more-options-box {
+        margin-top: 60px;
+        background: var(--pt-gray-100);
+        border: 1px solid var(--border-color);
+        padding: 40px;
+        text-align: center;
+    }
+    .more-options-box h3 {
+        color: var(--text-primary);
+        margin-top: 0;
+    }
+    .more-options-box p {
+        color: var(--text-secondary) !important;
+        margin-bottom: 24px;
+    }
+
+    /* MacOS Specific Adjustments */
+    .macos-card { border-bottom: 4px solid #000; }
+    body.dark-theme .macos-card { border-bottom-color: #fff; }
+    body.dark-theme .macos-btn { background-color: #fff !important; color: #000 !important; border-color: #fff !important; }
+</style>
+
+<div class="hero-section">
+    <div class="container">
+        <span class="badge badge-dark" style="background: var(--pt-red);">DOWNLOAD OVERVIEW</span>
+        <h1 style="margin-top: 16px;">Get {{ product.title }}</h1>
+        <p class="lead">
+            Choose your platform to start with {{ product.title }}.
+            {% if product.version %}
+                <br><strong style="color: white; display: block; margin-top: 8px;">Current Version: {{ product.version }}</strong>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="container" style="max-width: 1100px; margin-bottom: 80px;">
+    
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;">
+        
+        {# Windows #}
+        {% if product.allowWindows %}
+        <div class="card download-card" style="border-bottom: 4px solid #00adef;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Windows_logo_-_2021.svg" alt="Windows" width="64" height="64" style="margin-bottom: 24px;">
+            <h2>Windows</h2>
+            <p>Compatible with Windows 10 & 11 (64-bit & ARM64)</p>
+            <div style="margin-top: auto; width: 100%;">
+                <a href="{{ path('app_product_download_os', {'slug': product.slug, 'os': 'windows'}) }}" class="btn btn-primary" style="width: 100%; background-color: #00adef; border-color: #00adef;">Download for Windows</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# macOS #}
+        {% if product.allowMacos %}
+        <div class="card download-card macos-card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" class="apple-logo" alt="macOS" style="height: 64px; width: auto; object-fit: contain; margin-bottom: 24px;">
+            <h2>macOS</h2>
+            <p>Universal Binary (Intel & Apple Silicon)</p>
+            <div style="margin-top: auto; width: 100%;">
+                <a href="{{ path('app_product_download_os', {'slug': product.slug, 'os': 'macos'}) }}" class="btn btn-primary macos-btn" style="width: 100%; background-color: #000; border-color: #000;">Download for macOS</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Linux #}
+        {% if product.allowLinux %}
+        <div class="card download-card" style="border-bottom: 4px solid #E95420;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" alt="Linux" width="64" height="64" style="margin-bottom: 24px;">
+            <h2>Linux</h2>
+            <p>AppImage, Flatpak, and distribution-native packages</p>
+            <div style="margin-top: auto; width: 100%;">
+                <a href="{{ path('app_product_download_os', {'slug': product.slug, 'os': 'linux'}) }}" class="btn btn-primary" style="width: 100%; background-color: #E95420; border-color: #E95420;">Download for Linux</a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="more-options-box">
+        <h3>More Options</h3>
+        <p>Browse all historical releases or check the installation guide.</p>
+        <div style="display: flex; gap: 16px; justify-content: center;">
+            <a href="https://ftp.projecttick.org/Project-Tick/{{ product.ftpFolderName|default('ProjT-Launcher') }}/releases/download/" target="_blank" class="btn btn-secondary">All Releases</a>
+            <a href="{{ path('app_handbook') }}" class="btn btn-secondary">Installation Guide &rarr;</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

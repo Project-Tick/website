@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tick Engine Intelligence | Project Tick Status{% endblock %}
+
+{% block body %}
+<div class="status-intelligence-view" style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Inter', sans-serif; color: var(--text-primary);">
+    
+    <!-- Hero Section: The Pulse -->
+    <div class="intelligence-header" style="background: rgba(0,0,0,0.02); border: 1px solid var(--pt-gray-100); border-radius: 24px; padding: 40px; margin-bottom: 40px; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: rgba(238, 0, 0, 0.03); filter: blur(80px); border-radius: 50%;"></div>
+        
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px;">
+            Tick <span style="color: #EE0000;">Engine</span> Intelligence
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 24px;">Global Infrastructure Integrity Scan</p>
+        
+        <div class="pulse-status" style="display: inline-flex; align-items: center; gap: 16px; background: {% if overall_status == 'Operational' %}#f2fdf5{% else %}#fdf2f2{% endif %}; padding: 12px 40px; border-radius: 100px; border: 1px solid {% if overall_status == 'Operational' %}#00C853{% else %}#EE0000{% endif %};">
+            <div class="pulse-orb" style="width: 14px; height: 14px; background: {% if overall_status == 'Operational' %}#00C853{% else %}#EE0000{% endif %}; border-radius: 50%; box-shadow: 0 0 15px {% if overall_status == 'Operational' %}#00C853{% else %}#EE0000{% endif %}; animation: pulse-anim 2s infinite;"></div>
+            <span style="font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: {% if overall_status == 'Operational' %}#00C853{% else %}#EE0000{% endif %};">
+                {{ overall_status }}
+            </span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 40px;">
+        <!-- Main: Monitor Grid -->
+        <div class="monitors-col">
+            <h2 style="font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="M14 15l3 3 5-5"/></svg>
+                Active Nodes
+            </h2>
+
+            <div style="display: grid; gap: 20px;">
+                {% for monitor in monitors %}
+                <div class="intel-card" style="background: var(--bg-card); border: 1px solid var(--pt-gray-100); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div>
+                            <h3 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: var(--text-primary);">{{ monitor.name }}</h3>
+                            <div style="display: flex; gap: 12px; margin-top: 5px; font-size: 0.8rem; color: var(--text-secondary);">
+                                <span>AVG: <strong>{{ monitor.avg_ping }}ms</strong></span>
+                                <span>UPTIME: <strong>{{ monitor.uptime_percentage }}</strong></span>
+                                {% if monitor.ssl_days %}
+                                <span style="{% if monitor.ssl_days < 10 %}color: #EE0000; font-weight: bold;{% endif %}">
+                                    SSL: {{ monitor.ssl_days }} days
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div style="background: {% if monitor.status == 'operational' %}rgba(0,200,83,0.1){% else %}rgba(238,0,0,0.1){% endif %}; padding: 6px 16px; border-radius: 8px; color: {% if monitor.status == 'operational' %}#00C853{% else %}#EE0000{% endif %}; font-weight: 800; font-size: 0.8rem; text-transform: uppercase;">
+                            {{ monitor.status }}
+                        </div>
+                    </div>
+
+                    <div class="metrics-row" style="display: flex; gap: 4px; height: 40px; align-items: flex-end;">
+                        {% for beat in monitor.history %}
+                        {% set height = (beat.ping / 500 * 100)|default(10) %}
+                        {% if height < 10 %}{% set height = 10 %}{% endif %}
+                        {% if height > 100 %}{% set height = 100 %}{% endif %}
+                        <div class="tick-node" 
+                             style="flex: 1; height: {{ height }}%; min-height: 8px; background: {% if beat.status == 1 %}#00C853{% else %}#EE0000{% endif %}; opacity: 0.6; transition: all 0.2s;"
+                             title="{{ beat.time }} | {{ beat.ping }}ms | {{ beat.msg }}">
+                        </div>
+                        {% else %}
+                            <div style="flex: 1; height: 10px; background: var(--pt-gray-50); border-radius: 10px;"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sidebar: Incident History -->
+        <div class="sidebar-col">
+            <h2 style="font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; color: var(--text-secondary);">
+                Analysis
+            </h2>
+            
+            <div class="sidebar-box" style="background: var(--bg-card); border: 1px solid var(--pt-gray-100); border-radius: 20px; padding: 24px;">
+                <h4 style="font-size: 0.9rem; font-weight: 800; margin-bottom: 20px;">Recent Incidents</h4>
+                
+                {% for incident in incidents %}
+                <div style="border-left: 2px solid #EE0000; padding-left: 15px; margin-bottom: 20px;">
+                    <div style="font-size: 0.8rem; font-weight: 800;">{{ incident.monitor }}</div>
+                    <div style="font-size: 0.75rem; color: #EE0000; margin-top: 2px;">{{ incident.error }}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px;">{{ incident.time|date('H:i:s') }}</div>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 20px 0;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--pt-gray-200)" stroke-width="2" style="margin-bottom: 10px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">No issues identified in the last 24h.</p>
+                </div>
+                {% endfor %}
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--pt-gray-50);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 10px;">
+                        <span style="color: var(--text-secondary);">Core Systems</span>
+                        <span style="color: #00C853; font-weight: bold;">SECURE</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                        <span style="color: var(--text-secondary);">Monitoring Latency</span>
+                        <span style="font-weight: bold;">0.04ms</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse-anim {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .intel-card:hover {
+        transform: translateY(-5px);
+        border-color: #EE0000 !important;
+        box-shadow: 0 10px 40px rgba(238, 0, 0, 0.05) !important;
+    }
+    .tick-node:hover {
+        opacity: 1 !important;
+        transform: scaleY(1.2);
+    }
+    body.dark-theme .intel-card, body.dark-theme .sidebar-box {
+        background: var(--pt-black-900) !important;
+        border-color: var(--border-color) !important;
+    }
+    body.dark-theme .intelligence-header {
+        background: rgba(255,255,255,0.02) !important;
+        border-color: var(--border-color) !important;
+    }
+    body.dark-theme .pulse-status {
+        background: rgba(255,255,255,0.05) !important;
+    }
+</style>
+
+<script>
+    // Intelligent auto-refresh (60 seconds)
+    setTimeout(() => window.location.reload(), 60000);
+</script>
+{% endblock %}

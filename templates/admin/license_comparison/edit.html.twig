@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Comparison{% endblock %}
+
+{% block body %}
+    <h1>Edit Comparison Field</h1>
+
+    <div class="card" style="max-width: 600px;">
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <div class="admin-card-actions">
+                <button class="btn btn-primary">Update</button>
+                <a href="{{ path('app_admin_license_comparison_index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+        
+        {{ include('admin/license_comparison/_delete_form.html.twig') }}
+    </div>
+{% endblock %}

@@ -1,0 +1,492 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - {{ user.userIdentifier }}{% endblock %}
+
+{% block body %}
+    <style>
+        .profile-container {
+            display: flex;
+            gap: 48px;
+            padding: 40px 0;
+            align-items: flex-start;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+                gap: 24px;
+            }
+            .profile-sidebar {
+                width: 100% !important;
+            }
+        }
+
+        .profile-sidebar {
+            flex: 0 0 296px;
+            width: 296px;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: auto;
+            border-radius: 50%;
+            border: 1px solid #d0d7de;
+            margin-bottom: 16px;
+            background-color: #f6f8fa;
+        }
+
+        .profile-names h1 {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.25;
+            margin: 0;
+            color: var(--pt-black);
+        }
+
+        .profile-names .nickname {
+            font-size: 20px;
+            font-weight: 300;
+            color: var(--pt-gray-600);
+            line-height: 24px;
+        }
+
+        .profile-bio {
+            margin-top: 16px;
+            font-size: 16px;
+            color: var(--pt-black);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .vcard-details {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--pt-black);
+        }
+
+        .vcard-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .profile-content {
+            flex: 1;
+            min-width: 0; /* Prevents flex overflow */
+            width: 100%;
+        }
+
+        .profile-tabs {
+            border-bottom: 1px solid #d0d7de;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 30px;
+            overflow-x: auto;
+        }
+
+        .tab-item {
+            padding: 8px 0 16px;
+            font-size: 14px;
+            color: var(--pt-black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid transparent;
+            transition: border-bottom-color 0.2s;
+        }
+
+        .tab-item.active {
+            font-weight: 600;
+            border-bottom-color: var(--pt-red);
+        }
+
+        .tab-item:hover {
+            border-bottom-color: var(--pt-gray-300);
+        }
+        
+        .tab-item.active:hover {
+            border-bottom-color: var(--pt-red);
+        }
+
+        .pinned-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 900px) {
+             .pinned-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pinned-item {
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .pinned-item-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--pt-red);
+        }
+        
+        .pinned-item-desc {
+            font-size: 12px;
+            color: var(--pt-gray-600);
+            margin-bottom: 16px;
+            flex: 1;
+        }
+        
+        .pinned-item-meta {
+            font-size: 12px;
+            color: var(--pt-gray-600);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .contribution-graph {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 24px;
+            margin-top: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+            background: var(--pt-gray-100);
+        }
+        
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12px;
+            background: var(--pt-gray-100);
+            color: var(--text-primary);
+        }
+    </style>
+
+    <div class="container">
+        <div class="profile-container">
+            <!-- Left Sidebar -->
+            <div class="profile-sidebar">
+                {% if user.avatar %}
+                    {% set avatar_url = user.avatar starts with 'http' ? user.avatar : asset('uploads/avatars/' ~ user.avatar) %}
+                    <img src="{{ avatar_url }}" class="avatar-img" alt="Profile Picture" style="border-color: var(--border-color); background: var(--pt-gray-100);">
+                {% else %}
+                    <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ user.username ?: user.email }}" class="avatar-img" alt="Profile Picture" style="background: var(--pt-gray-100); border-color: var(--border-color);">
+                {% endif %}
+                
+                <div class="profile-names">
+                    <h1>
+                        {% if user.githubUsername %}
+                            {{ user.githubUsername }}
+                        {% elseif user.gitlabUsername %}
+                            {{ user.gitlabUsername }}
+                        {% else %}
+                            {{ user.email|split('@')[0] }}
+                        {% endif %}
+                    </h1>
+                    <div class="nickname">{{ user.email }}</div>
+                </div>
+
+                {% if user.biography %}
+                    <div class="profile-bio">{{ user.biography }}</div>
+                {% else %}
+                    <div class="profile-bio" style="color: #888; font-style: italic;">No bio added yet.</div>
+                {% endif %}
+
+                <div style="margin-top: 16px;">
+                    <a href="{{ path('app_user_settings') }}" class="btn btn-secondary btn-block" style="background: var(--pt-gray-100); border-color: var(--border-color); color: var(--text-primary); font-weight: 600;">Edit Profile</a>
+                </div>
+
+                <div class="vcard-details">
+                    {% if user.country %}
+                        <div class="vcard-detail">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="#666"><path d="m12.596 11.596-3.535 3.536a1.5 1.5 0 0 1-2.122 0l-3.535-3.536a6.5 6.5 0 1 1 9.192-9.193 6.5 6.5 0 0 1 0 9.193Zm-1.06-8.132v-.001a5 5 0 1 0-7.072 7.072L8 14.07l3.536-3.534a5 5 0 0 0 0-7.072ZM8 9a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 9Z"></path></svg>
+                            {{ user.country }}
+                        </div>
+                    {% endif %}
+                    {% if user.timezone %}
+                         <div class="vcard-detail">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="#666"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v3.25h3.25a.75.75 0 0 1 0 1.5H8.5V1.25H8.5Z"></path></svg>
+                            {{ user.timezone }}
+                         </div>
+                    {% endif %}
+                    
+                    <div class="vcard-detail" style="margin-top: 12px; flex-wrap: wrap; gap: 8px;">
+                        {% if user.githubId %}
+                            <div class="connection-badge" title="Verified GitHub Connection">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="14" height="14">
+                                GitHub
+                            </div>
+                        {% endif %}
+                        {% if user.gitlabId %}
+                             <div class="connection-badge" title="Verified GitLab Connection">
+                                <img src="https://about.gitlab.com/images/press/press-kit-icon.svg" alt="GitLab" width="14" height="14">
+                                GitLab
+                             </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="identity-card" style="margin-top: 24px; padding: 20px; background: var(--pt-gray-100); border-radius: 12px; border: 1px solid var(--border-color); position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--pt-red);"></div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <div class="status-pulse" style="width: 10px; height: 10px; background: #28a745; border-radius: 50%; box-shadow: 0 0 0 rgba(40, 167, 69, 0.4); animation: pulse 2s infinite;"></div>
+                            <strong style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-primary);">Tick ID Verified</strong>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.4;">Your ecosystem identity is cryptographically linked and active.</p>
+                        
+                        <div class="token-well" style="background: var(--pt-black-900); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="font-size: 10px; color: #888; margin-bottom: 4px; font-family: var(--font-display); text-transform: uppercase;">Identity Bearer Token</div>
+                            <div id="tick-token-display" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.7;">
+                                {{ tick_token|slice(0, 15) }}...{{ tick_token|slice(-8) }}
+                            </div>
+                        </div>
+
+                        <button onclick="copyToClipboard('{{ tick_token }}', this)" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 13px; border-radius: 6px; box-shadow: 0 4px 12px rgba(255, 0, 62, 0.2);">Copy Full Token</button>
+                        <div style="text-align: center; margin-top: 12px;">
+                            <a href="javascript:void(0)" onclick="regenerateTickToken()" style="font-size: 11px; color: var(--pt-gray-600); text-decoration: none; border-bottom: 1px dashed var(--pt-gray-300); transition: color 0.2s;">Regenerate Identity</a>
+                        </div>
+                    </div>
+
+                    <style>
+                        @keyframes pulse {
+                            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+                            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+                            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+                        }
+                        .identity-card:hover { border-color: var(--pt-red) !important; transition: border-color 0.3s ease; }
+                    </style>
+
+                    {% if user.minecraftAccessToken %}
+                        <div class="minecraft-card" style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <img src="https://mc-heads.net/avatar/{{ user.minecraftUuid }}/16" width="16" height="16" style="border-radius: 2px;">
+                                <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary);">Minecraft Session</strong>
+                            </div>
+                            <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Logged in as <strong>{{ user.minecraftUsername }}</strong>. Active session token:</p>
+                            <button onclick="copyToClipboard('{{ user.minecraftAccessToken }}', this)" class="btn btn-secondary btn-block" style="font-size: 12px; padding: 6px; background: #2E7D32; color: white; border: none; border-radius: 6px;">Copy Minecraft Token</button>
+                            <div style="text-align: center; margin-top: 8px;">
+                                <a href="{{ path('connect_microsoft_start') }}" style="font-size: 10px; color: var(--pt-gray-600); text-decoration: none;">Refresh Session</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="minecraft-card-empty" style="margin-top: 16px; padding: 16px; background: var(--pt-gray-100); border-radius: 12px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Minecraft_logo.svg" width="16" height="16">
+                                <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary);">Minecraft</strong>
+                            </div>
+                            <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Link your account to see your session tokens here.</p>
+                            <a href="{{ path('connect_microsoft_start') }}" class="btn btn-secondary btn-block" style="font-size: 12px; padding: 6px; background: var(--pt-black-900); color: white; border: none; text-decoration: none; border-radius: 6px;">Link Minecraft</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <script>
+                    function copyToClipboard(text, btn) {
+                        const originalText = btn.innerText;
+                        const originalBackground = btn.style.background;
+
+                        if (!text || text === '') {
+                            alert('No token found. Please sign in with Microsoft again.');
+                            return;
+                        }
+
+                        // Try modern clipboard API first
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(() => {
+                                handleCopySuccess(btn, originalText, originalBackground);
+                            }).catch(() => {
+                                fallbackCopyToClipboard(text, btn, originalText, originalBackground);
+                            });
+                        } else {
+                            fallbackCopyToClipboard(text, btn, originalText, originalBackground);
+                        }
+                    }
+
+                    function fallbackCopyToClipboard(text, btn, originalText, originalBackground) {
+                        const textArea = document.createElement("textarea");
+                        textArea.value = text;
+                        textArea.style.position = "fixed";
+                        textArea.style.left = "-9999px";
+                        textArea.style.top = "0";
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        let success = false;
+                        try {
+                            success = document.execCommand('copy');
+                        } catch (err) {}
+                        
+                        document.body.removeChild(textArea);
+                        
+                        if (success) {
+                            handleCopySuccess(btn, originalText, originalBackground);
+                        } else {
+                            btn.innerText = 'Error!';
+                            btn.style.background = '#dc3545';
+                            setTimeout(() => {
+                                btn.innerText = originalText;
+                                btn.style.background = originalBackground;
+                            }, 2000);
+                        }
+                    }
+
+                    function handleCopySuccess(btn, originalText, originalBackground) {
+                        btn.innerText = 'Copied!';
+                        btn.style.background = '#28a745';
+                        btn.style.color = 'white';
+                        setTimeout(() => {
+                            btn.innerText = originalText;
+                            btn.style.background = originalBackground;
+                            btn.style.color = '';
+                        }, 2000);
+                    }
+
+                    async function regenerateTickToken() {
+                        if (!confirm('Regenerating will invalidate your current token. Continue?')) return;
+                        try {
+                            const formData = new FormData();
+                            formData.append('_token', '{{ csrf_token('regenerate_token') }}');
+                            
+                            const response = await fetch('{{ path('api_identity_token_regenerate') }}', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await response.json();
+                            if (data.token) {
+                                // Update the display fragment
+                                const display = document.getElementById('tick-token-display');
+                                if (display) {
+                                    display.innerText = data.token.substring(0, 15) + '...' + data.token.substring(data.token.length - 8);
+                                }
+                                
+                                const tickBtn = document.querySelector('button[onclick^="copyToClipboard(\'{{ tick_token }}"]');
+                                if (tickBtn) {
+                                    tickBtn.setAttribute('onclick', `copyToClipboard('${data.token}', this)`);
+                                }
+                                alert('Token regenerated! You can now copy it.');
+                            }
+                        } catch (err) {
+                            alert('Update failed.');
+                        }
+                    }
+                </script>
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-content">
+                <div class="profile-tabs">
+                    <a href="#" class="tab-item active">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.6;"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path><path d="M7 4.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5A.75.75 0 0 1 7 4.75ZM7.75 7a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5h-1.5ZM7 11.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z"></path></svg>
+                        Overview
+                    </a>
+                    <a href="{{ path('app_user_licenses') }}" class="tab-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.6;"><path d="M6.438 12.063c.5 0 .938-.438.938-.938V6.937c0-.5-.438-.937-.938-.937H1.937C1.438 6 1 6.437 1 6.938v4.187c0 .5.438.938.938.938h4.5zm0-7.813c.5 0 .938.438.938.938v.937H1v-.937c0-.5.438-.938.938-.938h4.5zM14.062 6c.5 0 .938.438.938.938v7.124c0 .5-.438.938-.938.938H8.938c-.5 0-.938-.438-.938-.938V6.938c0-.5.438-.938.938-.938h5.124zm0-3.375c.5 0 .938.438.938.938v.937H8V3.563c0-.5.438-.938.938-.938h5.124zM8 0a1 1 0 0 1 1 1v1h5.063A1.938 1.938 0 0 1 16 3.938v10.124A1.938 1.938 0 0 1 14.062 16H8.937A1.938 1.938 0 0 1 7 14.062V13H1.937A1.938 1.938 0 0 1 0 11.062V3.937A1.938 1.938 0 0 1 1.938 2H7V1a1 1 0 0 1 1-1z"></path></svg>
+                        Licenses
+                    </a>
+                    <a href="{{ path('app_user_settings') }}" class="tab-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.6;"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.292.02 1.555.563l.569 1.171c.29.596.008 1.298-.411 1.725l-.826.838a.97.97 0 0 0-.011 1.253l.824.838c.419.426.7 1.128.41 1.725l-.57 1.171c-.263.543-.91.74-1.554.563l-1.103-.303a.526.526 0 0 0-.299.071 6.31 6.31 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106a.497.497 0 0 0-.211-.224A6.136 6.136 0 0 1 5.38 11.16a.496.496 0 0 0-.299-.071l-1.103.303c-.644.176-1.292-.02-1.555-.563l-.569-1.171a1.284 1.284 0 0 1 .411-1.725l.826-.838a.97.97 0 0 0 .011-1.252l-.824-.838a1.283 1.283 0 0 1-.41-1.725l.57-1.171c.263-.543.91-.74 1.554-.563l1.103.303a.526.526 0 0 0 .299-.071 6.307 6.307 0 0 1 .668-.386c.133-.066.194-.158.211-.224l.29-1.106C6.01.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm0 5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"></path></svg>
+                        Settings
+                    </a>
+                    
+                    <a href="{{ path('app_logout') }}" class="tab-item" style="margin-left: auto; color: var(--pt-red);">
+                        Logout
+                    </a>
+                </div>
+
+
+
+                <div style="margin-bottom: 24px;">
+                    <h3 style="font-size: 16px; margin-bottom: 16px;">Pinned Resources</h3>
+                    <div class="pinned-grid">
+                        <!-- Licenses Pin -->
+                        <div class="pinned-item">
+                            <div>
+                                <div class="pinned-item-header">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.438 12.063c.5 0 .938-.438.938-.938V6.937c0-.5-.438-.937-.938-.937H1.937C1.438 6 1 6.437 1 6.938v4.187c0 .5.438.938.938.938h4.5zm0-7.813c.5 0 .938.438.938.938v.937H1v-.937c0-.5.438-.938.938-.938h4.5zM14.062 6c.5 0 .938.438.938.938v7.124c0 .5-.438.938-.938.938H8.938c-.5 0-.938-.438-.938-.938V6.938c0-.5.438-.938.938-.938h5.124zm0-3.375c.5 0 .938.438.938.938v.937H8V3.563c0-.5.438-.938.938-.938h5.124zM8 0a1 1 0 0 1 1 1v1h5.063A1.938 1.938 0 0 1 16 3.938v10.124A1.938 1.938 0 0 1 14.062 16H8.937A1.938 1.938 0 0 1 7 14.062V13H1.937A1.938 1.938 0 0 1 0 11.062V3.937A1.938 1.938 0 0 1 1.938 2H7V1a1 1 0 0 1 1-1z"></path></svg>
+                                    <a href="{{ path('app_user_licenses') }}" style="color: var(--pt-black); text-decoration: none; font-weight: 600;">My License Keys</a>
+                                    <span style="border: 1px solid #d0d7de; border-radius: 2em; color: #666; font-size: 12px; padding: 0 7px; margin-left: auto;">Public</span>
+                                </div>
+                                <div class="pinned-item-desc">
+                                    Manage your personal licenses and subscriptions for Project Tick software.
+                                </div>
+                            </div>
+                            <div class="pinned-item-meta">
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 12px; height: 12px; background: #DAAA3F; border-radius: 50%;"></span>
+                                    Keys
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Handbook Pin -->
+                        <div class="pinned-item">
+                            <div>
+                                <div class="pinned-item-header">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9Zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8ZM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25Z"></path></svg>
+                                    <a href="{{ path('app_handbook') }}" style="color: var(--pt-black); text-decoration: none; font-weight: 600;">Handbook</a>
+                                    <span style="border: 1px solid #d0d7de; border-radius: 2em; color: #666; font-size: 12px; padding: 0 7px; margin-left: auto;">Public</span>
+                                </div>
+                                <div class="pinned-item-desc">
+                                    Official documentation and guides for Project Tick framework.
+                                </div>
+                            </div>
+                            <div class="pinned-item-meta">
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 12px; height: 12px; background: #e34c26; border-radius: 50%;"></span>
+                                    Docs
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 32px;">
+                    <h3 style="font-size: 16px; margin-bottom: 16px;">Recent Activity</h3>
+                    <div style="border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
+                        {% for activity in activities %}
+                            <div style="padding: 16px; border-bottom: 1px solid var(--border-color); background: var(--pt-gray-100); display: flex; align-items: flex-start; gap: 12px;">
+                                <div style="margin-top: 2px;">
+                                    {% if activity.type == 'license' %}
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--pt-red)"><path d="M11 11V7H5v4h6zm1-5h-1V3h-4v3H6V3H2v11h12V3h-2v3z"/></svg>
+                                    {% elseif activity.type == 'roadmap' %}
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="#2E7D32"><path d="M8 1.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-1.5 0V2.5A.75.75 0 0 1 8 1.75Z"/></svg>
+                                    {% else %}
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="#1976D2"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div style="font-size: 14px; color: var(--text-primary); font-weight: 500;">{{ activity.title }}</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">{{ activity.date|date('M d, Y') }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="padding: 32px; text-align: center; color: #888; font-style: italic;">No recent activity.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

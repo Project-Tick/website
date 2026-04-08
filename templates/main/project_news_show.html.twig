@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ post.title }} - {{ site_setting('nav_news_label', 'News') }}{% endblock %}
+
+{% block body %}
+<div class="container">
+  <h1>{{ post.title }}</h1>
+  <p style="font-size: 0.9em; color: #666; margin-bottom: 30px;">
+    {% if post.category %}
+        <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 8px; border: 1px solid rgba(255,255,255,0.2);">{{ post.category.name }}</span>
+    {% endif %}
+    {{ site_setting('news_published_on', 'Published on') }} {{ post.date|date('F d, Y') }}
+  </p>
+
+  <div class="content">
+    {{ post.content|convert_markdown_links|markdown_to_html|raw }}
+  </div>
+
+  <hr>
+  <p><a href="{{ path('app_project_news') }}">&larr; {{ site_setting('news_back_link', 'Back to News') }}</a></p>
+</div>
+{% endblock %}

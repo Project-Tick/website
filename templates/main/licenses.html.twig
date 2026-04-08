@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ site_setting('nav_licenses_label', 'Licenses') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+
+{% block body %}
+<div class="hero" style="padding: 60px 0; background: var(--pt-black-900); text-align: center; color: white; margin-bottom: 60px; border-bottom: 4px solid var(--pt-red);">
+    <div class="container">
+        <h1 style="color: white; font-size: 3.5rem; margin-bottom: 16px;">{{ site_setting('nav_licenses_label', 'Licenses') }}</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 800px; margin: 0 auto;">
+            {{ site_setting('licenses_intro_text', 'Official Project Tick licenses designed for open-source clarity, modern AI challenges, and community governance.') }}
+        </p>
+    </div>
+</div>
+
+<div class="container">
+  <div class="alert-box-modern" style="padding: 32px; border-left: 8px solid var(--pt-red); margin-bottom: 60px; font-size: 1.1rem; line-height: 1.7; background: var(--pt-gray-10); border-radius: 4px; border-right: 1px solid var(--border-color); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    {{ site_setting('licenses_alert_box_content', '<strong>Full-Stack Licensing:</strong> Beyond code, Project Tick provides specialized protection for AI, Data, and Network services.')|raw }}
+  </div>
+
+  <h2 style="margin-bottom: 24px;">{{ site_setting('licenses_comparison_title', 'Quick Comparison') }}</h2>
+  <div class="card mb-5" style="padding: 0; overflow: hidden;">
+      <div style="overflow-x: auto;">
+          <table class="table" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th style="padding: 16px 20px; background: #151515 !important; color: #FFFFFF !important; border: 1px solid #333;">Feature</th>
+                <th style="padding: 16px 20px; background: #151515 !important; color: #FFFFFF !important; border: 1px solid #333;">{{ site_setting('licenses_comp_col1', 'MIT / Apache 2.0') }}</th>
+                <th style="padding: 16px 20px; background: #151515 !important; color: #FFFFFF !important; border: 1px solid #333;">{{ site_setting('licenses_comp_col2', 'GNU GPL v2 / v3') }}</th>
+                <th style="padding: 16px 20px; background: #EE0000 !important; color: #FFFFFF !important; border: 1px solid #BE0000;">{{ site_setting('licenses_comp_col3', 'Project Tick ecosystem') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for comparison in comparisons %}
+                <tr>
+                  <td style="padding: 16px 20px; border-bottom: 1px solid var(--border-color);"><strong>{{ comparison.feature }}</strong></td>
+                  <td style="padding: 16px 20px; border-bottom: 1px solid var(--border-color);">{{ comparison.mitApache|raw }}</td>
+                  <td style="padding: 16px 20px; border-bottom: 1px solid var(--border-color);">{{ comparison.gnuGpl|raw }}</td>
+                  <td style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); background: rgba(238, 0, 0, 0.03);"><strong>{{ comparison.projectTick|raw }}</strong></td>
+                </tr>
+              {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        Comparison data not yet populated in Admin Panel.
+                    </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+      </div>
+  </div>
+
+  {% for category in categories %}
+    <div style="margin-top: 80px; margin-bottom: 40px; border-bottom: 2px solid var(--pt-red); display: inline-block;">
+        <h2 style="margin-bottom: 8px;">{{ category.name }}</h2>
+    </div>
+    
+    {% if category.description %}
+      <p style="color: var(--text-secondary); margin-bottom: 32px; font-size: 1.1rem; max-width: 800px;">{{ category.description }}</p>
+    {% endif %}
+    
+    <div class="grid">
+        {% for license in category.licenses %}
+          <div class="card license-card" style="display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                  <h3 style="margin: 0; font-size: 1.4rem;">{{ license.name }}</h3>
+              </div>
+              
+              <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">{{ license.content|striptags|slice(0, 160) }}...</p>
+              
+              {% if license.usageDocumentation %}
+                <div style="background: var(--pt-gray-10); padding: 16px; font-size: 0.85rem; margin-bottom: 24px; border-left: 3px solid var(--pt-red); border-radius: 0 4px 4px 0;">
+                    <strong style="color: var(--pt-red); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Suggested Usage:</strong><br>
+                    <div style="margin-top: 4px;">{{ license.usageDocumentation|nl2br }}</div>
+                </div>
+              {% endif %}
+
+              <div style="margin-top: auto; display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                  <a href="{{ path('app_licenses_show', {'slug': license.slug}) }}" class="btn btn-primary" style="flex: 1; text-align: center;">View License</a>
+                  <a href="{{ path('app_licenses_show_txt', {'slug': license.slug}) }}" class="btn btn-secondary" style="padding: 10px 20px;">TXT</a>
+              </div>
+          </div>
+        {% else %}
+          <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+             No licenses found in this category.
+          </div>
+        {% endfor %}
+    </div>
+  {% endfor %}
+
+  <div class="card" style="margin-top: 80px; padding: 40px; text-align: center; background: var(--pt-black-900); color: white; border-top: 4px solid var(--pt-red);">
+      <h3 style="color: white; margin-top: 0;">Looking for standard Open Source licenses?</h3>
+      <p style="color: var(--pt-gray-300); max-width: 600px; margin: 16px auto 32px;">We maintain a comprehensive database of global industry-standard licenses from SPDX and OSI.</p>
+      <a href="{{ path('app_spdx_licenses') }}" class="btn btn-primary">Explore Global Licenses &rarr;</a>
+  </div>
+</div>
+{% endblock %}

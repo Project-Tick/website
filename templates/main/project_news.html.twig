@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ site_setting('nav_news_label', 'Project Tick News') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+
+{% block body %}
+  <div style="background: var(--pt-black); color: white; padding: 60px 0; margin-bottom: 40px; text-align: center; border-bottom: 4px solid var(--pt-red);">
+    <div class="container">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 16px;">{{ site_setting('nav_news_label', 'Project Tick News') }}</h1>
+        <p style="font-size: 1.25rem; color: #D2D2D2; max-width: 700px; margin: 0 auto 32px;">
+            {{ site_setting('news_list_desc', 'Latest updates and announcements.') }}
+        </p>
+
+        <div style="max-width: 500px; margin: 0 auto;">
+            <form action="{{ path('app_project_news') }}" method="get" class="pt-search-wrapper">
+                <input type="text" name="q" value="{{ search_query|default('') }}" placeholder="Search news..." class="pt-search-input" style="padding: 12px 20px; border-radius: 30px; background: rgba(255,255,255,0.1);">
+                {% if search_query %}
+                    <a href="{{ path('app_project_news') }}" style="position: absolute; right: 16px; top: 12px; color: var(--pt-gray-300); font-weight: bold; font-size: 0.8rem;">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+  </div>
+
+  <div class="container">
+    {% if search_query %}
+        <div style="margin-bottom: 32px; border-bottom: 2px solid var(--pt-gray-200); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0;">Search Results for "{{ search_query }}"</h2>
+            <a href="{{ path('app_project_news') }}" style="color: var(--pt-red); font-weight: bold;">Clear Search</a>
+        </div>
+    {% endif %}
+
+    <div style="margin-bottom: 32px;">
+         <a href="{{ path('app_feed_main') }}" target="_blank" class="btn btn-secondary" style="background: transparent; border-color: #ddd; color: #666; padding: 6px 16px; font-size: 0.85rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            Global News Feed (RSS)
+         </a>
+    </div>
+
+    <div style="margin-top: 40px;">
+    {% for post in news_list %}
+        <div style="margin-bottom: 40px;">
+            <h2 style="margin-bottom: 5px;"><a href="{{ path('app_project_news_show', {'slug': post.slug}) }}" style="color: var(--pt-black); text-decoration: none;">{{ post.title }}</a></h2>
+            <p style="font-size: 0.85em; color: var(--pt-gray-600); margin-bottom: 15px;">
+                {% if post.category %}
+                    <span style="background: rgba(0,0,0,0.05); color: var(--pt-red); padding: 2px 8px; border-radius: 4px; margin-right: 8px; font-weight: bold; border: 1px solid rgba(0,0,0,0.05);">{{ post.category.name }}</span>
+                {% endif %}
+                {{ post.date|date('F d, Y') }}
+            </p>
+            <p style="color: var(--text-secondary); line-height: 1.6;">{{ post.description }}</p>
+            <a href="{{ path('app_project_news_show', {'slug': post.slug}) }}" style="color: var(--pt-red); font-weight: bold; text-decoration: none;">{{ site_setting('news_read_more', 'Read more') }} &rarr;</a>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px; background: var(--pt-gray-100); border-radius: 4px;">
+            <p style="font-size: 1.2rem; color: var(--pt-gray-600);">{{ search_query ? 'No news found matching your search.' : site_setting('news_empty_text', 'No news yet. Stay tuned!') }}</p>
+            {% if search_query %}
+                <a href="{{ path('app_project_news') }}" class="btn btn-primary" style="margin-top: 16px;">View All News</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Handbook Management{% endblock %}
+
+{% block body %}
+<div class="py-5">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+        <div>
+            <h1>Manage Handbook</h1>
+            <p>Administer documentation and wiki entries.</p>
+        </div>
+        <a href="{{ path('app_admin_handbook_new') }}" class="btn btn-primary">+ Create New Entry</a>
+    </div>
+    
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Slug</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td style="font-weight: bold;">{{ entry.title }}</td>
+                    <td>
+                        <span style="background: var(--pt-gray-200); padding: 4px 8px; font-size: 0.8rem; font-weight: bold;">
+                            {{ entry.category }}
+                        </span>
+                    </td>
+                    <td><code>{{ entry.slug }}</code></td>
+                    <td>
+                        <div style="display: flex; gap: 12px;">
+                            <a href="{{ path('app_admin_handbook_edit', {id: entry.id}) }}" class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">Edit</a>
+                            <a href="{{ path('app_handbook_show', {slug: entry.slug}) }}" target="_blank" class="btn btn-ghost" style="padding: 4px 0; font-size: 0.8rem;">Preview</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">No handbook entries found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
