@@ -16,6 +16,7 @@
     {% for post in news %}
     {% set meta = post.metadata %}
     {% set version = meta.release_version|default(null) %}
+    {% set release_tag = meta.release_tag|default(version) %}
     <item>
         <title>{{ post.title|escape('html') }}</title>
         <description><![CDATA[{{ post.content|markdown_to_html }}]]></description>
@@ -27,8 +28,8 @@
         <projt:channel>{{ meta.channel|default('stable') }}</projt:channel>
         <projt:notes_format>html</projt:notes_format>
         <projt:release_page>{{ url('app_product_news_show', {'slug': 'projt-launcher', 'newsSlug': post.slug}) }}</projt:release_page>
-{% if asset_map[version] is defined %}
-{% for asset in asset_map[version] %}
+{% if asset_map[release_tag] is defined %}
+{% for asset in asset_map[release_tag] %}
         <projt:asset
             url="{{ asset.url }}"
             name="{{ asset.name }}"
@@ -41,8 +42,8 @@
             sha256="{{ asset.sha256 }}"
             qt="{{ asset.qt }}" />
 {% endfor %}
-{% if asset_map[version]|length > 0 %}
-{% set first_asset = asset_map[version]|first %}
+{% if asset_map[release_tag]|length > 0 %}
+{% set first_asset = asset_map[release_tag]|first %}
         <enclosure url="{{ first_asset.url }}" length="{{ first_asset.size }}" type="{{ first_asset.content_type }}" />
 {% endif %}
 {% endif %}

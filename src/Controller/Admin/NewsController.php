@@ -90,9 +90,9 @@ class NewsController extends AbstractController
         $form = $this->createForm(NewsType::class, $news);
         
         // Manually set data for unmapped fields
-        $fields = ['release_version', 'minimum_macos_version', 'macos_file_extension', 'macos_signature'];
+        $fields = ['release_version', 'release_tag', 'minimum_macos_version', 'macos_file_extension', 'macos_signature'];
         foreach ($fields as $field) {
-            if (isset($metadata[$field])) {
+            if (isset($metadata[$field]) && $form->has($field)) {
                 $form->get($field)->setData($metadata[$field]);
             }
         }
@@ -137,11 +137,13 @@ class NewsController extends AbstractController
         $metadata = $news->getMetadata() ?? [];
         
         // Sync Sparkle fields
-        $sparkleFields = ['release_version', 'minimum_macos_version', 'macos_file_extension', 'macos_signature'];
+        $sparkleFields = ['release_version', 'release_tag', 'minimum_macos_version', 'macos_file_extension', 'macos_signature'];
         foreach ($sparkleFields as $field) {
-            $value = $form->get($field)->getData();
-            if ($value) {
-                $metadata[$field] = $value;
+            if ($form->has($field)) {
+                $value = $form->get($field)->getData();
+                if ($value) {
+                    $metadata[$field] = $value;
+                }
             }
         }
 

@@ -98,7 +98,14 @@ class NewsType extends AbstractType
                 'required' => false,
                 'label' => 'Sparkle: Release Version',
                 'attr' => ['class' => 'form-control sparkle-field', 'data-key' => 'release_version'],
-                'help' => 'e.g. 0.0.4-2'
+                'help' => 'Canonical semver, e.g. 7.0.0 or 0.0.4-2'
+            ])
+            ->add('release_tag', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Release Tag',
+                'attr' => ['class' => 'form-control sparkle-field', 'data-key' => 'release_tag'],
+                'help' => 'Git/GitHub release tag, e.g. v202604102316. Defaults to release_version if empty.'
             ])
             ->add('minimum_macos_version', TextType::class, [
                 'mapped' => false,

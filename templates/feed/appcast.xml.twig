@@ -10,6 +10,7 @@
         {% set github_base = product.githubUrl|default('https://github.com/Project-Tick/' ~ (product.title|default('ProjT Launcher')|replace({' ': '-'}))) %}
         {% if github_base ends with '/' %}{% set github_base = github_base[:-1] %}{% endif %}
         {% set binary_prefix = meta.binary_prefix|default(product.title|default('ProjTLauncher')|replace({' ': ''})) %}
+        {% set release_tag = meta.release_tag|default(meta.release_version) %}
 
         {% if meta.macos_signature is defined %}
       <item>
@@ -33,7 +34,7 @@
         {% if meta.minimum_autoupdate_version is defined %}<sparkle:minimumAutoupdateVersion>{{ meta.minimum_autoupdate_version }}</sparkle:minimumAutoupdateVersion>{% endif %}
         {% if meta.phased_rollout_interval is defined %}<sparkle:phasedRolloutInterval>{{ meta.phased_rollout_interval }}</sparkle:phasedRolloutInterval>{% endif %}
         <enclosure sparkle:os="macos"
-            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-macOS-{{ meta.release_version }}.{{ meta.macos_file_extension|default('zip') }}"
+            url="{{ github_base }}/releases/download/{{ release_tag }}/{{ binary_prefix }}-macOS-{{ release_tag }}.{{ meta.macos_file_extension|default('zip') }}"
             length="0"
             type="application/octet-stream"
             sparkle:edSignature="{{ meta.macos_signature }}"/>
@@ -64,14 +65,14 @@
         
         {% if meta.win32_signature is defined %}
         <enclosure sparkle:os="windows-x86"
-            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-Windows-i686-Setup-{{ meta.release_version }}.zip"
+            url="{{ github_base }}/releases/download/{{ release_tag }}/{{ binary_prefix }}-Windows-i686-Setup-{{ release_tag }}.zip"
             length="0"
             type="application/octet-stream"
             sparkle:dsaSignature="{{ meta.win32_signature }}"/>
         {% endif %}
         {% if meta.win64_signature is defined %}
         <enclosure sparkle:os="windows-x64"
-            url="{{ github_base }}/releases/download/{{ meta.release_version }}/{{ binary_prefix }}-Windows-x86_64-Setup-{{ meta.release_version }}.zip"
+            url="{{ github_base }}/releases/download/{{ release_tag }}/{{ binary_prefix }}-Windows-x86_64-Setup-{{ release_tag }}.zip"
             length="0"
             type="application/octet-stream"
             sparkle:dsaSignature="{{ meta.win64_signature }}"/>

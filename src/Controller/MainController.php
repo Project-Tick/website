@@ -735,15 +735,16 @@ final class MainController extends AbstractController
 
         // ProjT Launcher gets the updater-compatible appcast feed
         if ($slug === 'projt-launcher') {
-            // Build asset map keyed by version
+            // Build asset map keyed by release_tag (falls back to release_version)
             $assetMap = [];
             $ftpFolder = $product ? $product->getFtpFolderName() : 'ProjT-Launcher';
             foreach ($news as $post) {
                 $meta = $post->getMetadata() ?? [];
                 $version = $meta['release_version'] ?? null;
+                $releaseTag = $meta['release_tag'] ?? $version;
 
-                if ($version !== null && !isset($assetMap[$version])) {
-                    $assetMap[$version] = $launcherFeed->getAssetsForVersion($version, $ftpFolder);
+                if ($releaseTag !== null && !isset($assetMap[$releaseTag])) {
+                    $assetMap[$releaseTag] = $launcherFeed->getAssetsForVersion($releaseTag, $ftpFolder);
                 }
             }
 

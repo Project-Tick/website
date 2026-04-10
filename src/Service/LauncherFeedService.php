@@ -137,6 +137,8 @@ class LauncherFeedService
 
     /**
      * Get all available release versions, sorted newest-first.
+     * When a release directory contains components.json, uses its component
+     * version for sorting; otherwise falls back to directory name.
      *
      * @return string[]
      */
@@ -151,12 +153,37 @@ class LauncherFeedService
             return $d !== '.' && $d !== '..' && is_dir($baseDir . '/' . $d);
         });
 
-        // Sort by version, newest first
-        usort($dirs, function ($a, $b) {
-            return version_compare($this->normalizeVersion($b), $this->normalizeVersion($a));
+        // Build sortable version for each directory
+        $versionMap = [];
+        foreach ($dirs as $dir) {
+            $versionMap[$dir] = $this->resolveComponentVersion($baseDir . '/' . $dir, $dir);
+        }
+
+        // Sort by resolved version, newest first
+        usort($dirs, function ($a, $b) use ($versionMap) {
+            return version_compare(
+                $this->normalizeVersion($versionMap[$b]),
+                $this->normalizeVersion($versionMap[$a])
+            );
         });
 
         return array_values($dirs);
+    }
+
+    /**
+     * Read the MeshMC component version from components.json in a release
+     * directory. Falls back to the directory name if not available.
+     */
+    private function resolveComponentVersion(string $releaseDir, string $fallback): string
+    {
+        $componentsFile = $releaseDir . '/components.json';
+        if (file_exists($componentsFile)) {
+            $data = json_decode(file_get_contents($componentsFile), true);
+            if (is_array($data) && isset($data['components']['meshmc']['version'])) {
+                return $data['components']['meshmc']['version'];
+            }
+        }
+        return $fallback;
     }
 
     /**
