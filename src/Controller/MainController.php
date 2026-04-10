@@ -737,7 +737,7 @@ final class MainController extends AbstractController
         if ($slug === 'projt-launcher') {
             // Build asset map keyed by release_tag (falls back to release_version)
             $assetMap = [];
-            $ftpFolder = $product ? $product->getFtpFolderName() : 'ProjT-Launcher';
+            $ftpFolder = ($product ? $product->getFtpFolderName() : null) ?? 'ProjT-Launcher';
             foreach ($news as $post) {
                 $meta = $post->getMetadata() ?? [];
                 $version = $meta['release_version'] ?? null;
