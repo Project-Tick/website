@@ -1,0 +1,35 @@
+version = 1
+
+[[annotations]]
+path = ["src/**.php",
+        "tests/**.php",
+        "templates/**.html.twig",
+        "templates/**.xml.twig",
+        "templates/**.json.twig",
+        "migrations/**.php",
+        "config/**",
+        "bin/**",
+        "assets/**"
+        ]
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = "2021-2026 Project Tick"
+
+[[annotations]]
+path = [
+  ".gitignore",
+  ".gitattributes",
+  ".gitmodules",
+  ".github/**",
+  ".dockerignore",
+  "importmap.php",
+  "projt_crontab.txt",
+  "*.lock",
+  "*.xml",
+  "*.json",
+  ".env",
+  ".env*",
+  "public/**",
+  "VERSION"
+]
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileCopyrightText = "NONE"
