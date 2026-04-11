@@ -7,9 +7,9 @@
     {% for post in news %}
     {% set meta = post.metadata %}
     {% if meta.release_version is defined %}
-        {% set github_base = product.githubUrl|default('https://github.com/Project-Tick/' ~ (product.title|default('ProjT Launcher')|replace({' ': '-'}))) %}
+        {% set github_base = product.githubUrl|default('https://github.com/Project-Tick/' ~ (product.title|default('Project Tick Launcher')|replace({' ': '-'}))) %}
         {% if github_base ends with '/' %}{% set github_base = github_base[:-1] %}{% endif %}
-        {% set binary_prefix = meta.binary_prefix|default(product.title|default('ProjTLauncher')|replace({' ': ''})) %}
+        {% set binary_prefix = meta.binary_prefix|default(product.title|default('ProjectTickLauncher')|replace({' ': ''})) %}
         {% set release_tag = meta.release_tag|default(meta.release_version) %}
 
         {% if meta.macos_signature is defined %}

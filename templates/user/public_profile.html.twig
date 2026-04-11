@@ -103,7 +103,8 @@
             <!-- Left Sidebar -->
             <div class="profile-sidebar">
                 {% if user.avatar %}
-                    <img src="{{ asset('uploads/avatars/' ~ user.avatar) }}" class="avatar-img" alt="Profile Picture" style="border-color: var(--border-color); background: var(--pt-gray-100);">
+                    {% set avatar_url = user.avatar starts with 'http' ? user.avatar : asset('uploads/avatars/' ~ user.avatar) %}
+                    <img src="{{ avatar_url }}" class="avatar-img" alt="Profile Picture" style="border-color: var(--border-color); background: var(--pt-gray-100);">
                 {% else %}
                     <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ user.username ?: user.email }}" class="avatar-img" alt="Profile Picture" style="background: var(--pt-gray-100); border-color: var(--border-color);">
                 {% endif %}

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ site_setting('about_title_fallback', 'About ProjT Launcher') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
+{% block title %}{{ site_setting('about_title_fallback', 'About') }} - {{ site_setting('site_title', 'Project Tick') }}{% endblock %}
 
 {% block body %}
 <div class="container">
@@ -45,7 +45,7 @@
               {{ product.description|markdown_to_html|raw }}
           </div>
       {% else %}
-          <p>ProjT Launcher is a custom launcher for Minecraft that was forked from MultiMC. It allows the creation, and management of multiple installations of the game, or "instances" rather, each having their own separate mods, resource packs, settings, and more.</p>
+          <p>This is a custom launcher for Minecraft, originally forked from MultiMC. It allows the creation and management of multiple installations of the game, or "instances", each having their own separate mods, resource packs, settings, and more.</p>
       {% endif %}
 
       {% if product.features is not empty %}
@@ -57,10 +57,10 @@
           </ul>
       {% endif %}
   {% else %}
-      <h1>{{ site_setting('about_title_fallback', 'What is ProjT Launcher?') }}</h1>
-      <p>{{ site_setting('about_default_desc_1', 'ProjT Launcher is a custom launcher for Minecraft that was forked from MultiMC. It allows the creation, and management of multiple installations of the game, or "instances" rather, each having their own separate mods, resource packs, settings, and more.') }}</p>
+      <h1>{{ site_setting('about_title_fallback', 'What is Project Tick?') }}</h1>
+      <p>{{ site_setting('about_default_desc_1', 'Project Tick provides a custom Minecraft launcher originally forked from MultiMC. It allows the creation and management of multiple installations of the game, or "instances", each having their own separate mods, resource packs, settings, and more.') }}</p>
       
-      <p>{{ site_setting('about_default_desc_2', 'While originally being forked over packaging/redistribution concerns, ProjT Launcher brings new and exciting features developed by the community for the community. Furthermore, ProjT Launcher is still just as true to its roots as ever in providing a project that vows to never bring hostility to those looking to fork, redistribute, or repackage, so long as the terms of our license are respected.') }}</p>
+      <p>{{ site_setting('about_default_desc_2', 'While originally being forked over packaging/redistribution concerns, Project Tick brings new and exciting features developed by the community for the community. Furthermore, it vows to never bring hostility to those looking to fork, redistribute, or repackage, so long as the terms of our license are respected.') }}</p>
 
       <h2>{{ site_setting('launcher_feature_title', 'Key Features') }}</h2>
       <ul>

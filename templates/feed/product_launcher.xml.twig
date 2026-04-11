@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0"
      xmlns:atom="http://www.w3.org/2005/Atom"
-     xmlns:projt="https://projecttick.org/ns/projt-launcher/feed">
+     xmlns:projt="https://projecttick.org/ns/product-feed">
 <channel>
     <title>{{ title|escape('html') }}</title>
-    <description>ProjT Launcher release feed with updater-compatible metadata.</description>
+    <description>{{ title|default('Project Tick') }} release feed with updater-compatible metadata.</description>
     <link>{{ site_url }}</link>
     <atom:link href="{{ feed_url }}" rel="self" type="application/rss+xml" />
     <lastBuildDate>{% if news is not empty %}{{ news[0].date|date('r') }}{% else %}{{ 'now'|date('r') }}{% endif %}</lastBuildDate>
     <pubDate>{% if news is not empty %}{{ news[0].date|date('r') }}{% else %}{{ 'now'|date('r') }}{% endif %}</pubDate>
     <ttl>1800</ttl>
     <projt:feedVersion>1</projt:feedVersion>
-    <projt:product>{{ product.title|default('ProjT Launcher')|escape('html') }}</projt:product>
+    <projt:product>{{ product.title|default('Project Tick')|escape('html') }}</projt:product>
 
     {% for post in news %}
     {% set meta = post.metadata %}
@@ -20,14 +20,14 @@
     <item>
         <title>{{ post.title|escape('html') }}</title>
         <description><![CDATA[{{ post.content|markdown_to_html }}]]></description>
-        <link>{{ url('app_product_news_show', {'slug': 'projt-launcher', 'newsSlug': post.slug}) }}</link>
-        <guid isPermaLink="true">{{ url('app_product_news_show', {'slug': 'projt-launcher', 'newsSlug': post.slug}) }}</guid>
+        <link>{{ url('app_product_news_show', {'slug': product.slug|default('projt-launcher'), 'newsSlug': post.slug}) }}</link>
+        <guid isPermaLink="true">{{ url('app_product_news_show', {'slug': product.slug|default('projt-launcher'), 'newsSlug': post.slug}) }}</guid>
         <pubDate>{{ post.date|date('r') }}</pubDate>
 {% if version %}
         <projt:version>{{ version }}</projt:version>
         <projt:channel>{{ meta.channel|default('stable') }}</projt:channel>
         <projt:notes_format>html</projt:notes_format>
-        <projt:release_page>{{ url('app_product_news_show', {'slug': 'projt-launcher', 'newsSlug': post.slug}) }}</projt:release_page>
+        <projt:release_page>{{ url('app_product_news_show', {'slug': product.slug|default('projt-launcher'), 'newsSlug': post.slug}) }}</projt:release_page>
 {% if asset_map[release_tag] is defined %}
 {% for asset in asset_map[release_tag] %}
         <projt:asset

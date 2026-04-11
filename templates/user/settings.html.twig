@@ -6,21 +6,22 @@
 <div class="container py-5">
     <div style="margin-bottom: 40px;">
         <h1 style="margin-top: 0;">Account Settings</h1>
-        <p>Manage your profile and security preferences.</p>
+        <p>Manage your profile and security preferences. Identity, email, password, and linked accounts are managed through <a href="https://id.projecttick.net/realms/projecttick/account/" target="_blank" rel="noopener">Project Tick SSO</a>.</p>
     </div>
 
     <div class="grid" style="grid-template-columns: 2fr 1fr;">
         <div>
-            <!-- Profile Settings -->
+            <!-- Site Profile (local to this website) -->
             <div class="card" style="margin-bottom: 32px;">
-                <h3>Profile Information</h3>
+                <h3>Site Profile</h3>
                 {{ form_start(formProfile, {'attr': {'enctype': 'multipart/form-data'}}) }}
                     
                     <div class="form-group">
                         <label>Profile Picture</label>
                         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
                             {% if user.avatar %}
-                                <img src="{{ asset('uploads/avatars/' ~ user.avatar) }}" width="64" height="64" style="border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                                {% set avatar_url = user.avatar starts with 'http' ? user.avatar : asset('uploads/avatars/' ~ user.avatar) %}
+                                <img src="{{ avatar_url }}" width="64" height="64" style="border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
                             {% else %}
                                 <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ user.username ?: user.email }}" width="64" height="64" style="border-radius: 50%; border: 1px solid var(--border-color); background: var(--pt-gray-200);">
                             {% endif %}
@@ -60,76 +61,85 @@
                 {{ form_end(formProfile) }}
             </div>
 
-            <!-- Email Address Settings -->
+            <!-- Keycloak Account Management Links -->
             <div class="card" style="margin-bottom: 32px;">
-                <h3>Email Address</h3>
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Your current email address is <strong>{{ user.email }}</strong></p>
-                
-                <form action="{{ path('app_user_email_change_request') }}" method="POST">
-                    <input type="hidden" name="_token" value="{{ csrf_token('request_email_change') }}">
-                    <div class="form-group">
-                        <label for="new_email">New Email Address</label>
-                        <input type="email" name="email" id="new_email" class="form-control" required placeholder="new@example.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="current_password_email">Confirm with Password</label>
-                        <input type="password" name="current_password" id="current_password_email" class="form-control" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="btn btn-secondary" style="margin-top: 8px;">Request Email Change</button>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 12px;">We will send a confirmation link to your new email address.</p>
-                </form>
-            </div>
-
-            <!-- Connected Accounts -->
-            <div class="card" style="margin-bottom: 32px;">
-                <h3>Connected Accounts</h3>
-                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                    {% if user.keycloakId %}
-                        <div style="padding: 16px; background: var(--pt-gray-100); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; border-radius: 4px;">
-                            <i class="fa-solid fa-key" style="font-size: 24px;"></i>
-                            <div>
-                                <strong style="color: var(--text-primary);">Project Tick SSO</strong><br>
-                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Account linked</span>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="{{ path('connect_keycloak_start') }}" class="btn btn-secondary" style="background: var(--pt-gray-200); border: none; color: var(--text-primary);">Link Project Tick SSO</a>
-                    {% endif %}
+                <h3>Identity &amp; Security</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                    These settings are managed through Project Tick SSO (Keycloak). You will be redirected to <strong>id.projecttick.net</strong>.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <a href="https://id.projecttick.net/realms/projecttick/account/#/personal-info" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px; justify-content: flex-start; text-align: left;">
+                        <i class="fa-solid fa-user" style="width: 20px; text-align: center;"></i>
+                        Personal Info &amp; Email
+                    </a>
+                    <a href="https://id.projecttick.net/realms/projecttick/account/#/security/signingin" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px; justify-content: flex-start; text-align: left;">
+                        <i class="fa-solid fa-lock" style="width: 20px; text-align: center;"></i>
+                        Password &amp; Two-Factor Auth
+                    </a>
+                    <a href="https://id.projecttick.net/realms/projecttick/account/#/security/linked-accounts" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px; justify-content: flex-start; text-align: left;">
+                        <i class="fa-solid fa-link" style="width: 20px; text-align: center;"></i>
+                        Linked Accounts (GitHub, GitLab, Microsoft)
+                    </a>
+                    <a href="https://id.projecttick.net/realms/projecttick/account/#/security/device-activity" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 10px; justify-content: flex-start; text-align: left;">
+                        <i class="fa-solid fa-desktop" style="width: 20px; text-align: center;"></i>
+                        Active Sessions &amp; Devices
+                    </a>
                 </div>
             </div>
-
         </div>
 
         <div>
-            <!-- Security -->
+            <!-- SSO Status -->
             <div class="card" style="margin-bottom: 32px;">
-                <h3>Security</h3>
-                {% if user.password %}
-                    {{ form_start(formPassword) }}
-                        <div class="form-group">
-                            {{ form_label(formPassword.currentPassword) }}
-                            {{ form_widget(formPassword.currentPassword) }}
-                            {{ form_errors(formPassword.currentPassword) }}
+                <h3>SSO Status</h3>
+                {% if user.keycloakId %}
+                    <div style="padding: 16px; background: var(--pt-gray-100); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; border-radius: 4px;">
+                        <i class="fa-solid fa-circle-check" style="font-size: 24px; color: #2E7D32;"></i>
+                        <div>
+                            <strong style="color: var(--text-primary);">Project Tick SSO</strong><br>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Account linked</span>
                         </div>
-                        <div class="form-group">
-                            {{ form_label(formPassword.newPassword.first) }}
-                            {{ form_widget(formPassword.newPassword.first) }}
-                            {{ form_errors(formPassword.newPassword.first) }}
-                        </div>
-                         <div class="form-group">
-                            {{ form_label(formPassword.newPassword.second) }}
-                            {{ form_widget(formPassword.newPassword.second) }}
-                            {{ form_errors(formPassword.newPassword.second) }}
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Change Password</button>
-                    {{ form_end(formPassword) }}
-                {% else %}
-                    <div class="notification type-info">
-                        You signed in using a social account and don't have a password set. You can set one by using "Forgot Password" on login if you add an email.
                     </div>
+                    <a href="https://id.projecttick.net/realms/projecttick/account/" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; margin-top: 16px;">
+                        Open Account Console
+                    </a>
+                {% else %}
+                    <a href="{{ path('connect_keycloak_start') }}" class="btn btn-primary" style="width: 100%;">Link Project Tick SSO</a>
                 {% endif %}
             </div>
 
+            <!-- Connected Accounts (live from Keycloak) -->
+            <div class="card" style="margin-bottom: 32px;">
+                <h3>Connected Accounts</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% set providers = [
+                        {name: 'github', label: 'GitHub', icon: 'fa-brands fa-github', color: '#333'},
+                        {name: 'gitlab', label: 'GitLab', icon: 'fa-brands fa-gitlab', color: '#FC6D26'},
+                        {name: 'microsoft', label: 'Microsoft', icon: 'fa-brands fa-microsoft', color: '#00A4EF'},
+                        {name: 'google', label: 'Google', icon: 'fa-brands fa-google', color: '#4285F4'},
+                    ] %}
+                    {% for p in providers %}
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--pt-gray-100);">
+                            <i class="{{ p.icon }}" style="font-size: 18px; width: 24px; text-align: center; color: {{ p.color }};"></i>
+                            <div style="flex: 1;">
+                                <strong style="font-size: 0.9rem;">{{ p.label }}</strong>
+                                {% if p.name in linkedProviders|keys %}
+                                    <div style="font-size: 0.8rem; color: #2E7D32;">
+                                        <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i>
+                                        {{ linkedProviders[p.name] ?: 'Connected' }}
+                                    </div>
+                                {% else %}
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Not connected</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <a href="https://id.projecttick.net/realms/projecttick/account/#/security/linked-accounts" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="margin-right: 6px;"></i>
+                        Manage Linked Accounts
+                    </a>
+                </div>
+            </div>
 
             <!-- Danger Zone -->
             <div class="card" style="border-color: var(--pt-red); background: rgba(255, 0, 60, 0.05);">

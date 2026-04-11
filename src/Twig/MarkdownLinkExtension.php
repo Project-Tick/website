@@ -28,7 +28,7 @@ class MarkdownLinkExtension extends AbstractExtension
             return '[' . $matches[1] . '](' . $prefix . $slug . ')';
         }, $content);
 
-        // 3. Convert /projtlauncher/img/ to /img/
+        // 3. Convert legacy /projtlauncher/img/ paths to /img/
         $content = str_replace('/projtlauncher/img/', '/img/', $content);
 
         return $content;

@@ -69,6 +69,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/integration, roles: ROLE_USER }
         - { path: ^/api/identity/token, roles: ROLE_USER }
         - { path: ^/api/identity/me, roles: PUBLIC_ACCESS }
         - { path: ^/api/license/verify, roles: PUBLIC_ACCESS }

@@ -72,5 +72,12 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\KeycloakBrokerService:
+        arguments:
+            $keycloakClientId: '%env(OAUTH_KEYCLOAK_ID)%'
+            $keycloakClientSecret: '%env(OAUTH_KEYCLOAK_SECRET)%'
+            $keycloakAdminUser: '%env(KEYCLOAK_ADMIN_USER)%'
+            $keycloakAdminPassword: '%env(KEYCLOAK_ADMIN_PASSWORD)%'
+
     Twig\Extension\StringLoaderExtension: ~
 

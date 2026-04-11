@@ -45,6 +45,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Repository\SiteSettingRepository;
+use App\Service\KeycloakBrokerService;
 use Symfony\Component\Uid\Uuid;
 
 #[Route('/user')]
@@ -52,11 +53,19 @@ use Symfony\Component\Uid\Uuid;
 class UserController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_user_dashboard')]
-    public function index(EntityManagerInterface $em): Response
+    public function index(EntityManagerInterface $em, KeycloakBrokerService $brokerService): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $gravatarHash = md5(strtolower(trim($user->getEmail())));
+
+        $linkedProviders = [];
+        if ($user->getKeycloakId()) {
+            $linked = $brokerService->getLinkedProviders($user->getKeycloakId());
+            foreach ($linked as $entry) {
+                $linkedProviders[$entry['identityProvider'] ?? ''] = $entry['userName'] ?? '';
+            }
+        }
 
         $activities = [];
 
@@ -95,7 +104,8 @@ class UserController extends AbstractController
             'user' => $user,
             'gravatarHash' => $gravatarHash,
             'activities' => $activities,
-            'tick_token' => $user->getTickApiToken()
+            'tick_token' => $user->getTickApiToken(),
+            'linkedProviders' => $linkedProviders,
         ]);
     }
 
@@ -113,9 +123,17 @@ class UserController extends AbstractController
 
 
     #[Route('/settings', name: 'app_user_settings')]
-    public function settings(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger): Response
+    public function settings(Request $request, EntityManagerInterface $em, SluggerInterface $slugger, KeycloakBrokerService $brokerService): Response
     {
         $user = $this->getUser();
+
+        $linkedProviders = [];
+        if ($user->getKeycloakId()) {
+            $linked = $brokerService->getLinkedProviders($user->getKeycloakId());
+            foreach ($linked as $entry) {
+                $linkedProviders[$entry['identityProvider'] ?? ''] = $entry['userName'] ?? '';
+            }
+        }
         
         // Profile Form
         $formProfile = $this->createForm(\App\Form\UserProfileType::class, $user);
@@ -145,23 +163,11 @@ class UserController extends AbstractController
             $this->addFlash('success', 'Profile updated successfully.');
             return $this->redirectToRoute('app_user_settings');
         }
-
-        // Change Password Form
-        $formPassword = $this->createForm(\App\Form\ChangePasswordType::class);
-        $formPassword->handleRequest($request);
-
-        if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-            $newPassword = $formPassword->get('newPassword')->getData();
-            $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
-            $em->flush();
-            $this->addFlash('success', 'Password changed successfully.');
-            return $this->redirectToRoute('app_user_settings');
-        }
         
         return $this->render('user/settings.html.twig', [
             'formProfile' => $formProfile,
-            'formPassword' => $formPassword,
-            'user' => $user
+            'user' => $user,
+            'linkedProviders' => $linkedProviders,
         ]);
     }
 

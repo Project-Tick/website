@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}News - ProjT Launcher{% endblock %}
+{% block title %}News - {{ product.title|default(site_setting('site_title', 'Project Tick')) }}{% endblock %}
 
 {% block body %}
   <nav style="font-size: 0.8em; border-bottom: none; margin-bottom: 0;">
@@ -12,7 +12,7 @@
   <hr style="margin-top: 0;">
 
   <h1>News</h1>
-  <p>Latest updates and releases for ProjT Launcher.</p>
+  <p>Latest updates and releases for {{ product.title|default(site_setting('site_title', 'Project Tick')) }}.</p>
 
   <div style="margin-top: 40px;">
     {% for post in news_list %}

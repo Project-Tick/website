@@ -1,6 +1,6 @@
 {
   "version": "https://jsonfeed.org/version/1.1",
-  "title": "ProjT Launcher",
+  "title": "{{ title|default('Project Tick')|e('js') }}",
   "language": "en",
   "home_page_url": "{{ url('app_launcher') }}",
   "feed_url": "{{ url('app_feed_launcher_json') }}",
