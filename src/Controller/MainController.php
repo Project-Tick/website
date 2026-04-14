@@ -764,18 +764,27 @@ final class MainController extends AbstractController
         $product = $em->getRepository(\App\Entity\Product::class)->findOneBy(['slug' => $slug]);
         $title = $product ? $product->getTitle() . ' News' : ucwords(str_replace('-', ' ', $slug)) . ' News';
 
-        // ProjT Launcher gets the updater-compatible appcast feed
-        if ($slug === 'projt-launcher') {
+        // ProjT Launcher and MeshMC get the updater-compatible appcast feed
+        if ($slug === 'projt-launcher' || $slug === 'meshmc') {
             // Build asset map keyed by release_tag (falls back to release_version)
             $assetMap = [];
-            $ftpFolder = ($product ? $product->getFtpFolderName() : null) ?? 'ProjT-Launcher';
+            $defaultFtpFolder = $slug === 'meshmc' ? 'MeshMC' : 'ProjT-Launcher';
+            $ftpFolder = ($product ? $product->getFtpFolderName() : null) ?? $defaultFtpFolder;
             foreach ($news as $post) {
                 $meta = $post->getMetadata() ?? [];
                 $version = $meta['release_version'] ?? null;
                 $releaseTag = $meta['release_tag'] ?? $version;
 
                 if ($releaseTag !== null && !isset($assetMap[$releaseTag])) {
-                    $assetMap[$releaseTag] = $launcherFeed->getAssetsForVersion($releaseTag, $ftpFolder);
+                    $assets = [];
+                    // Try to fetch assets from the release_version folder first, then fallback to release_tag
+                    if ($version !== null) {
+                        $assets = $launcherFeed->getAssetsForVersion($version, $ftpFolder);
+                    }
+                    if (empty($assets)) {
+                        $assets = $launcherFeed->getAssetsForVersion($releaseTag, $ftpFolder);
+                    }
+                    $assetMap[$releaseTag] = $assets;
                 }
             }
 
