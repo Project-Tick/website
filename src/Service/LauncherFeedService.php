@@ -71,8 +71,8 @@ class LauncherFeedService
                 continue;
             }
 
-            // Only process ProjTLauncher binaries, skip sha256/asc/zsync and source archives
-            if (!str_starts_with($file, self::BINARY_PREFIX)) {
+            // Only process ProjTLauncher and MeshMC binaries, skip sha256/asc/zsync and source archives
+            if (!str_starts_with($file, 'ProjTLauncher') && !str_starts_with($file, 'MeshMC')) {
                 continue;
             }
             if (str_ends_with($file, '.sha256') || str_ends_with($file, '.asc') || str_ends_with($file, '.zsync')) {
@@ -80,9 +80,8 @@ class LauncherFeedService
             }
 
             // Skip the source tarball (ProjTLauncher-0.0.4-2.tar.gz etc)
-            if (preg_match('/^ProjTLauncher-\d+\.\d+/', $file)) {
-                // This catches ProjTLauncher-0.0.4-2.tar.gz (source archive)
-                // but we need to NOT catch ProjTLauncher-Linux-... etc.
+            if (preg_match('/^(ProjTLauncher|MeshMC)-\d+\.\d+/', $file)) {
+                // This catches source archives, but we need to NOT catch platform binaries
                 if (!str_contains($file, 'Linux') && !str_contains($file, 'Windows') && !str_contains($file, 'macOS')) {
                     continue;
                 }
