@@ -31,9 +31,12 @@ SOFTWARE.
 namespace App\Service;
 
 /**
- * Scans the FTP directory for per-product release tag files and resolves the
+ * Scans the FTP directory for per-product release tags and resolves the
  * latest release per (product, channel), producing a single latest.json that
  * groups channels (stable / beta / lts) under each product key.
+ *
+ * Filesystem layout:
+ *   <FTP_ROOT>/<product>/releases/download/<tag>/<files...>
  *
  * Tag format: <product>-<version>[-<suffix>]
  *   stable — <product>-vX.Y.Z              (e.g. meshmc-v7.19.0)
@@ -42,6 +45,10 @@ namespace App\Service;
  *
  * Note: the leading "v" prefix is present only on stable (semver) tags;
  * beta and lts tags use a bare timestamp + suffix.
+ *
+ * Tags that do not match any of the channel patterns above (including legacy
+ * monorepo snapshot tags such as v202604191350, vBETA…, vLTS…) are silently
+ * ignored.
  */
 class SnapshotService
 {
@@ -66,43 +73,98 @@ class SnapshotService
     ];
 
     /**
-     * Discover all product names that have at least one components file on
-     * the FTP. A product is anything matching components-<product>-<rest>.json.
+     * Discover all product names that exist on the FTP.
+     *
+     * A product is any direct subdirectory of FTP_ROOT that contains at least
+     * one release tag matching one of the channel patterns under
+     * releases/download/.
      *
      * @return string[]
      */
     public function discoverProducts(): array
     {
-        $files = glob(self::FTP_ROOT . '/components-*.json') ?: [];
+        if (!is_dir(self::FTP_ROOT)) {
+            return [];
+        }
 
+        $entries = scandir(self::FTP_ROOT) ?: [];
         $products = [];
-        foreach ($files as $file) {
-            $basename = basename($file);
-            // components-<product>-<version>[-<suffix>].json
-            // Product name is the first dash-delimited segment after "components-".
-            if (preg_match('/^components-([a-z][a-z0-9]*)-.+\.json$/i', $basename, $m)) {
-                $products[$m[1]] = true;
+
+        foreach ($entries as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $path = self::FTP_ROOT . '/' . $entry;
+            if (!is_dir($path)) {
+                continue;
+            }
+            if (!is_dir($path . '/releases/download')) {
+                continue;
+            }
+            // Only register the product if it has at least one tag we recognise.
+            if (!empty($this->listProductTags($entry))) {
+                $products[] = $entry;
             }
         }
 
-        $names = array_keys($products);
-        sort($names);
-        return $names;
+        sort($products);
+        return $products;
     }
 
     /**
-     * Classify a tag's version+suffix portion into a channel.
+     * List every recognised release tag for a product, classified by channel.
      *
-     * Returns [channel, sortKeyParts] or null if the tag does not match any
-     * known channel format.
+     * @return array<int, array{tag: string, channel: string, sort: array<int>}>
+     */
+    private function listProductTags(string $product): array
+    {
+        $downloadDir = self::FTP_ROOT . '/' . $product . '/releases/download';
+        if (!is_dir($downloadDir)) {
+            return [];
+        }
+
+        $entries = scandir($downloadDir) ?: [];
+        $prefix = $product . '-';
+        $results = [];
+
+        foreach ($entries as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            if (!is_dir($downloadDir . '/' . $entry)) {
+                continue;
+            }
+            if (!str_starts_with($entry, $prefix)) {
+                // Legacy global tag (v202604…, vBETA…, vLTS…) — ignore.
+                continue;
+            }
+
+            $versionPart = substr($entry, strlen($prefix));
+            $classified = $this->classifyVersionPart($versionPart);
+            if ($classified === null) {
+                continue;
+            }
+
+            $results[] = [
+                'tag'     => $entry,
+                'channel' => $classified[0],
+                'sort'    => $classified[1],
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Classify a tag's version+suffix portion into a channel and produce a
+     * numeric sort key.
      *
-     * @return array{0: string, 1: array<int|string>}|null
+     * @return array{0: string, 1: array<int>}|null
      */
     private function classifyVersionPart(string $versionPart): ?array
     {
         foreach (self::CHANNEL_VERSION_PATTERNS as $channel => $pattern) {
             if (preg_match($pattern, $versionPart, $m)) {
-                // Drop full match, keep capture groups as ints for sorting.
                 array_shift($m);
                 $parts = array_map('intval', $m);
                 return [$channel, $parts];
@@ -112,8 +174,8 @@ class SnapshotService
     }
 
     /**
-     * Find all components-<product>-*.json files and return the latest release
-     * tag for the given (product, channel) pair.
+     * Find the latest release tag for the given (product, channel) pair, or
+     * null if no recognised tag exists.
      */
     public function findLatestSnapshotTag(string $product, string $channel = 'stable'): ?string
     {
@@ -121,41 +183,18 @@ class SnapshotService
             return null;
         }
 
-        $pattern = self::FTP_ROOT . '/components-' . $product . '-*.json';
-        $files = glob($pattern) ?: [];
-
-        if (empty($files)) {
-            return null;
-        }
-
-        $prefix = 'components-' . $product . '-';
-
-        $candidates = []; // list of [tag, sortKeyParts]
-        foreach ($files as $file) {
-            $basename = basename($file);
-            if (!str_starts_with($basename, $prefix) || !str_ends_with($basename, '.json')) {
-                continue;
-            }
-
-            $versionPart = substr($basename, strlen($prefix), -strlen('.json'));
-            $classified = $this->classifyVersionPart($versionPart);
-            if ($classified === null || $classified[0] !== $channel) {
-                continue;
-            }
-
-            $tag = $product . '-' . $versionPart;
-            $candidates[] = [$tag, $classified[1]];
-        }
+        $candidates = array_values(array_filter(
+            $this->listProductTags($product),
+            static fn (array $row): bool => $row['channel'] === $channel,
+        ));
 
         if (empty($candidates)) {
             return null;
         }
 
-        // Sort by capture-group parts descending (works for both semver
-        // triples and (date, N) tuples since both are numeric arrays).
         usort($candidates, function (array $a, array $b): int {
-            $pa = $a[1];
-            $pb = $b[1];
+            $pa = $a['sort'];
+            $pb = $b['sort'];
             $len = max(count($pa), count($pb));
             for ($i = 0; $i < $len; $i++) {
                 $va = $pa[$i] ?? 0;
@@ -167,69 +206,59 @@ class SnapshotService
             return 0;
         });
 
-        return $candidates[0][0];
+        return $candidates[0]['tag'];
     }
 
     /**
-     * Read and parse a components-v*.json file for a given release tag.
+     * Extract the human-friendly version string from a tag.
      *
-     * @return array{schema_version: int, release_tag: string, release_date: string, components: array<string, array{version: string}>}|null
+     * stable: "meshmc-v7.19.0"            → "7.19.0"
+     * beta:   "meshmc-202605090000-beta1" → "202605090000-beta1"
+     * lts:    "meshmc-202605090000-lts1"  → "202605090000-lts1"
      */
-    public function readComponentsJson(string $releaseTag): ?array
+    private function versionFromTag(string $product, string $tag, string $channel): string
     {
-        $path = self::FTP_ROOT . '/components-' . $releaseTag . '.json';
-        if (!file_exists($path)) {
-            return null;
+        $versionPart = substr($tag, strlen($product) + 1); // strip "<product>-"
+        if ($channel === 'stable' && str_starts_with($versionPart, 'v')) {
+            return substr($versionPart, 1);
         }
-
-        $data = json_decode(file_get_contents($path), true);
-        if (!is_array($data)) {
-            return null;
-        }
-
-        return $data;
+        return $versionPart;
     }
 
     /**
-     * List all component directories on the FTP that contain releases
-     * for a given snapshot tag.
-     *
-     * @return array<string, array{name: string, has_release: bool, download_url: string|null}>
+     * Derive a release date for a tag. For beta/lts the embedded YYYYMMDDHHmm
+     * timestamp is used; for stable the directory mtime is used as a
+     * pragmatic fallback.
      */
-    public function scanComponentDirectories(string $releaseTag): array
+    private function releaseDateFor(string $product, string $tag, string $channel): string
     {
-        $result = [];
-        $entries = scandir(self::FTP_ROOT);
-
-        foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
+        if ($channel !== 'stable') {
+            $versionPart = substr($tag, strlen($product) + 1);
+            if (preg_match('/^(\d{4})(\d{2})(\d{2})\d{4}-/', $versionPart, $m)) {
+                return sprintf('%s-%s-%s', $m[1], $m[2], $m[3]);
             }
-
-            $fullPath = self::FTP_ROOT . '/' . $entry;
-            if (!is_dir($fullPath)) {
-                continue;
-            }
-
-            $releaseDir = $fullPath . '/releases/download/' . $releaseTag;
-            $hasRelease = is_dir($releaseDir);
-
-            $result[$entry] = [
-                'name' => $entry,
-                'has_release' => $hasRelease,
-                'download_url' => $hasRelease
-                    ? self::DOWNLOAD_ROOT_URL . '/' . $entry . '/releases/download/' . $releaseTag . '/'
-                    : null,
-            ];
         }
 
-        return $result;
+        $releaseDir = self::FTP_ROOT . '/' . $product . '/releases/download/' . $tag;
+        if (is_dir($releaseDir)) {
+            $mtime = @filemtime($releaseDir);
+            if ($mtime !== false) {
+                return date('Y-m-d', $mtime);
+            }
+        }
+        return date('Y-m-d');
     }
 
     /**
      * Build the per-channel data structure for the given (product, channel).
      *
-     * @return array|null
+     * @return array{
+     *     release_tag: string,
+     *     version: string,
+     *     release_date: string,
+     *     download_url: string,
+     *     files: array<array{name: string, url: string, size: int}>
+     * }|null
      */
     public function buildChannelData(string $product, string $channel): ?array
     {
@@ -238,42 +267,15 @@ class SnapshotService
             return null;
         }
 
-        $components = $this->readComponentsJson($tag);
-        if ($components === null) {
-            return null;
-        }
-
-        $dirs = $this->scanComponentDirectories($tag);
-
-        $componentDownloads = [];
-        foreach ($dirs as $dirName => $info) {
-            if (!$info['has_release']) {
-                continue;
-            }
-
-            $entry = [
-                'download_url' => $info['download_url'],
-            ];
-
-            if (isset($components['components'][$dirName]['version'])) {
-                $entry['version'] = $components['components'][$dirName]['version'];
-            }
-
-            $releaseDir = self::FTP_ROOT . '/' . $dirName . '/releases/download/' . $tag;
-            $files = $this->listReleaseFiles($releaseDir, $dirName, $tag);
-            if (!empty($files)) {
-                $entry['files'] = $files;
-            }
-
-            $componentDownloads[$dirName] = $entry;
-        }
+        $releaseDir = self::FTP_ROOT . '/' . $product . '/releases/download/' . $tag;
+        $downloadUrl = self::DOWNLOAD_ROOT_URL . '/' . $product . '/releases/download/' . $tag . '/';
 
         return [
-            'release_tag' => $tag,
-            'release_date' => $components['release_date'] ?? date('Y-m-d'),
-            'components_json_url' => self::DOWNLOAD_ROOT_URL . '/components-' . $tag . '.json',
-            'components' => $components['components'] ?? [],
-            'downloads' => $componentDownloads,
+            'release_tag'  => $tag,
+            'version'      => $this->versionFromTag($product, $tag, $channel),
+            'release_date' => $this->releaseDateFor($product, $tag, $channel),
+            'download_url' => $downloadUrl,
+            'files'        => $this->listReleaseFiles($releaseDir, $product, $tag),
         ];
     }
 
@@ -293,14 +295,12 @@ class SnapshotService
      *       }
      *     }
      *   }
-     *
-     * @return array
      */
     public function buildLatestJson(): array
     {
         $result = [
             'schema_version' => 2,
-            'products' => [],
+            'products'       => [],
         ];
 
         foreach ($this->discoverProducts() as $product) {
@@ -322,18 +322,18 @@ class SnapshotService
 
     /**
      * List release files (source archives only, skipping checksums/signatures)
-     * for a component release directory.
+     * for a product release directory.
      *
      * @return array<array{name: string, url: string, size: int}>
      */
-    private function listReleaseFiles(string $releaseDir, string $componentName, string $tag): array
+    private function listReleaseFiles(string $releaseDir, string $product, string $tag): array
     {
         if (!is_dir($releaseDir)) {
             return [];
         }
 
         $files = [];
-        $entries = scandir($releaseDir);
+        $entries = scandir($releaseDir) ?: [];
 
         foreach ($entries as $entry) {
             if ($entry === '.' || $entry === '..') {
@@ -355,10 +355,13 @@ class SnapshotService
 
             $files[] = [
                 'name' => $entry,
-                'url' => self::DOWNLOAD_ROOT_URL . '/' . $componentName . '/releases/download/' . $tag . '/' . $entry,
-                'size' => filesize($filePath),
+                'url'  => self::DOWNLOAD_ROOT_URL . '/' . $product . '/releases/download/' . $tag . '/' . $entry,
+                'size' => filesize($filePath) ?: 0,
             ];
         }
+
+        // Stable, deterministic order.
+        usort($files, static fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
 
         return $files;
     }

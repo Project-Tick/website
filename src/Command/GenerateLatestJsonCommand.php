@@ -80,32 +80,12 @@ class GenerateLatestJsonCommand extends Command
                     ['Field', 'Value'],
                     [
                         ['Release Tag', $ch['release_tag']],
+                        ['Version', $ch['version']],
                         ['Release Date', $ch['release_date']],
-                        ['Components JSON', $ch['components_json_url']],
+                        ['Download URL', $ch['download_url']],
+                        ['Files', (string) count($ch['files'] ?? [])],
                     ]
                 );
-
-                if (!empty($ch['components'])) {
-                    $rows = [];
-                    foreach ($ch['components'] as $name => $info) {
-                        $rows[] = [$name, $info['version'] ?? 'N/A'];
-                    }
-                    $io->table(['Component', 'Version'], $rows);
-                }
-
-                if (!empty($ch['downloads'])) {
-                    $downloadCount = 0;
-                    foreach ($ch['downloads'] as $name => $info) {
-                        $fileCount = count($info['files'] ?? []);
-                        $downloadCount += $fileCount;
-                        $io->writeln(sprintf('    <info>%s</info>: %d file(s)', $name, $fileCount));
-                    }
-                    $io->newLine();
-                    $io->writeln(sprintf('  Total: <info>%d</info> component(s), <info>%d</info> file(s)',
-                        count($ch['downloads']),
-                        $downloadCount,
-                    ));
-                }
             }
         }
 
