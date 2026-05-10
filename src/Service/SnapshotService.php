@@ -62,12 +62,16 @@ class SnapshotService
      * (i.e. everything after "<product>-"). Capture groups expose components
      * used for channel-aware sorting.
      *
-     *   stable: v(X).(Y).(Z)
+     *   stable: v(X)[.(Y)[.(Z)]]   — 1 to 3 numeric segments
      *   beta:   (YYYYMMDDHHmm)-beta(N)
      *   lts:    (YYYYMMDDHHmm)-lts(N)
+     *
+     * The stable pattern intentionally accepts short forms such as "v3" or
+     * "v3.2" in addition to full semver "v3.2.1" so that upstream library
+     * versioning conventions are preserved verbatim in tag names.
      */
     private const CHANNEL_VERSION_PATTERNS = [
-        'stable' => '/^v(\d+)\.(\d+)\.(\d+)$/',
+        'stable' => '/^v(\d+)(?:\.(\d+))?(?:\.(\d+))?$/',
         'beta'   => '/^(\d{12})-beta(\d+)$/',
         'lts'    => '/^(\d{12})-lts(\d+)$/',
     ];
