@@ -36,11 +36,12 @@ namespace App\Service;
  * groups channels (stable / beta / lts) under each product key.
  *
  * Tag format: <product>-<version>[-<suffix>]
- *   stable — <product>-X.Y.Z              (e.g. meshmc-7.19.0)
- *   beta   — <product>-YYYYMMDDHHmm-betaN (e.g. meshmc-202605090000-beta1)
- *   lts    — <product>-YYYYMMDDHHmm-ltsN  (e.g. meshmc-202605090000-lts1)
+ *   stable — <product>-vX.Y.Z              (e.g. meshmc-v7.19.0)
+ *   beta   — <product>-YYYYMMDDHHmm-betaN  (e.g. meshmc-202605090000-beta1)
+ *   lts    — <product>-YYYYMMDDHHmm-ltsN   (e.g. meshmc-202605090000-lts1)
  *
- * Note: the leading "v" prefix is intentionally absent in the new scheme.
+ * Note: the leading "v" prefix is present only on stable (semver) tags;
+ * beta and lts tags use a bare timestamp + suffix.
  */
 class SnapshotService
 {
@@ -54,12 +55,12 @@ class SnapshotService
      * (i.e. everything after "<product>-"). Capture groups expose components
      * used for channel-aware sorting.
      *
-     *   stable: (X)(.Y)(.Z)
-     *   beta:   (YYYYMMDDHHmm)(N)
-     *   lts:    (YYYYMMDDHHmm)(N)
+     *   stable: v(X).(Y).(Z)
+     *   beta:   (YYYYMMDDHHmm)-beta(N)
+     *   lts:    (YYYYMMDDHHmm)-lts(N)
      */
     private const CHANNEL_VERSION_PATTERNS = [
-        'stable' => '/^(\d+)\.(\d+)\.(\d+)$/',
+        'stable' => '/^v(\d+)\.(\d+)\.(\d+)$/',
         'beta'   => '/^(\d{12})-beta(\d+)$/',
         'lts'    => '/^(\d{12})-lts(\d+)$/',
     ];
