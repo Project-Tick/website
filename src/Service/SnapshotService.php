@@ -31,14 +31,16 @@ SOFTWARE.
 namespace App\Service;
 
 /**
- * Scans the FTP directory for snapshot component files and resolves the latest
- * snapshot release per channel (stable / beta / lts), producing a single
- * latest.json that contains all channels under their respective keys.
+ * Scans the FTP directory for per-product release tag files and resolves the
+ * latest release per (product, channel), producing a single latest.json that
+ * groups channels (stable / beta / lts) under each product key.
  *
- * Tag formats:
- *   stable  — vYYYYMMDDHHmm   (e.g. v202604191350)
- *   beta    — vBETAYYYYMMDDHHmm (e.g. vBETA202604191350)
- *   lts     — vLTSYYYYMM       (e.g. vLTS202604)
+ * Tag format: <product>-<version>[-<suffix>]
+ *   stable — <product>-X.Y.Z              (e.g. meshmc-7.19.0)
+ *   beta   — <product>-YYYYMMDDHHmm-betaN (e.g. meshmc-202605090000-beta1)
+ *   lts    — <product>-YYYYMMDDHHmm-ltsN  (e.g. meshmc-202605090000-lts1)
+ *
+ * Note: the leading "v" prefix is intentionally absent in the new scheme.
  */
 class SnapshotService
 {
@@ -47,51 +49,124 @@ class SnapshotService
 
     public const CHANNELS = ['stable', 'beta', 'lts'];
 
-    /** Regex patterns (anchored) for each channel's tag format. */
-    private const CHANNEL_TAG_PATTERNS = [
-        'stable' => '/^v\d{12}$/',
-        'beta'   => '/^vBETA\d{12}$/',
-        'lts'    => '/^vLTS\d{6}$/',
+    /**
+     * Anchored regex patterns matching the version+suffix portion of a tag
+     * (i.e. everything after "<product>-"). Capture groups expose components
+     * used for channel-aware sorting.
+     *
+     *   stable: (X)(.Y)(.Z)
+     *   beta:   (YYYYMMDDHHmm)(N)
+     *   lts:    (YYYYMMDDHHmm)(N)
+     */
+    private const CHANNEL_VERSION_PATTERNS = [
+        'stable' => '/^(\d+)\.(\d+)\.(\d+)$/',
+        'beta'   => '/^(\d{12})-beta(\d+)$/',
+        'lts'    => '/^(\d{12})-lts(\d+)$/',
     ];
 
     /**
-     * Find all components-v*.json files and return the latest release tag for
-     * the given channel (stable, beta, or lts).
+     * Discover all product names that have at least one components file on
+     * the FTP. A product is anything matching components-<product>-<rest>.json.
+     *
+     * @return string[]
      */
-    public function findLatestSnapshotTag(string $channel = 'stable'): ?string
+    public function discoverProducts(): array
     {
-        $pattern = self::FTP_ROOT . '/components-v*.json';
-        $files = glob($pattern);
+        $files = glob(self::FTP_ROOT . '/components-*.json') ?: [];
+
+        $products = [];
+        foreach ($files as $file) {
+            $basename = basename($file);
+            // components-<product>-<version>[-<suffix>].json
+            // Product name is the first dash-delimited segment after "components-".
+            if (preg_match('/^components-([a-z][a-z0-9]*)-.+\.json$/i', $basename, $m)) {
+                $products[$m[1]] = true;
+            }
+        }
+
+        $names = array_keys($products);
+        sort($names);
+        return $names;
+    }
+
+    /**
+     * Classify a tag's version+suffix portion into a channel.
+     *
+     * Returns [channel, sortKeyParts] or null if the tag does not match any
+     * known channel format.
+     *
+     * @return array{0: string, 1: array<int|string>}|null
+     */
+    private function classifyVersionPart(string $versionPart): ?array
+    {
+        foreach (self::CHANNEL_VERSION_PATTERNS as $channel => $pattern) {
+            if (preg_match($pattern, $versionPart, $m)) {
+                // Drop full match, keep capture groups as ints for sorting.
+                array_shift($m);
+                $parts = array_map('intval', $m);
+                return [$channel, $parts];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find all components-<product>-*.json files and return the latest release
+     * tag for the given (product, channel) pair.
+     */
+    public function findLatestSnapshotTag(string $product, string $channel = 'stable'): ?string
+    {
+        if (!in_array($channel, self::CHANNELS, true)) {
+            return null;
+        }
+
+        $pattern = self::FTP_ROOT . '/components-' . $product . '-*.json';
+        $files = glob($pattern) ?: [];
 
         if (empty($files)) {
             return null;
         }
 
-        $channelPattern = self::CHANNEL_TAG_PATTERNS[$channel] ?? self::CHANNEL_TAG_PATTERNS['stable'];
+        $prefix = 'components-' . $product . '-';
 
-        $tags = [];
+        $candidates = []; // list of [tag, sortKeyParts]
         foreach ($files as $file) {
             $basename = basename($file);
-            // Extract tag from "components-<tag>.json"
-            if (preg_match('/^components-(v[^.]+)\.json$/', $basename, $m)) {
-                $tag = $m[1];
-                if (preg_match($channelPattern, $tag)) {
-                    $tags[] = $tag;
-                }
+            if (!str_starts_with($basename, $prefix) || !str_ends_with($basename, '.json')) {
+                continue;
             }
+
+            $versionPart = substr($basename, strlen($prefix), -strlen('.json'));
+            $classified = $this->classifyVersionPart($versionPart);
+            if ($classified === null || $classified[0] !== $channel) {
+                continue;
+            }
+
+            $tag = $product . '-' . $versionPart;
+            $candidates[] = [$tag, $classified[1]];
         }
 
-        if (empty($tags)) {
+        if (empty($candidates)) {
             return null;
         }
 
-        // Sort descending by the string value (lexicographic is correct for
-        // zero-padded numeric suffixes with same-length prefix per channel)
-        usort($tags, function (string $a, string $b): int {
-            return strcmp($b, $a);
+        // Sort by capture-group parts descending (works for both semver
+        // triples and (date, N) tuples since both are numeric arrays).
+        usort($candidates, function (array $a, array $b): int {
+            $pa = $a[1];
+            $pb = $b[1];
+            $len = max(count($pa), count($pb));
+            for ($i = 0; $i < $len; $i++) {
+                $va = $pa[$i] ?? 0;
+                $vb = $pb[$i] ?? 0;
+                if ($va !== $vb) {
+                    return $vb <=> $va;
+                }
+            }
+            return 0;
         });
 
-        return $tags[0];
+        return $candidates[0][0];
     }
 
     /**
@@ -151,13 +226,13 @@ class SnapshotService
     }
 
     /**
-     * Build the per-channel data structure for the given channel.
+     * Build the per-channel data structure for the given (product, channel).
      *
      * @return array|null
      */
-    public function buildChannelData(string $channel): ?array
+    public function buildChannelData(string $product, string $channel): ?array
     {
-        $tag = $this->findLatestSnapshotTag($channel);
+        $tag = $this->findLatestSnapshotTag($product, $channel);
         if ($tag === null) {
             return null;
         }
@@ -202,21 +277,42 @@ class SnapshotService
     }
 
     /**
-     * Build the full latest.json structure containing all channels.
-     * Channels with no release tag are omitted.
+     * Build the full latest.json structure grouped by product.
+     * Products with no releases in any channel are omitted; within a product,
+     * channels with no release are likewise omitted.
+     *
+     * Shape:
+     *   {
+     *     "schema_version": 2,
+     *     "products": {
+     *       "<product>": {
+     *         "stable": { ... } | omitted,
+     *         "beta":   { ... } | omitted,
+     *         "lts":    { ... } | omitted
+     *       }
+     *     }
+     *   }
      *
      * @return array
      */
     public function buildLatestJson(): array
     {
         $result = [
-            'schema_version' => 1,
+            'schema_version' => 2,
+            'products' => [],
         ];
 
-        foreach (self::CHANNELS as $channel) {
-            $data = $this->buildChannelData($channel);
-            if ($data !== null) {
-                $result[$channel] = $data;
+        foreach ($this->discoverProducts() as $product) {
+            $productData = [];
+            foreach (self::CHANNELS as $channel) {
+                $data = $this->buildChannelData($product, $channel);
+                if ($data !== null) {
+                    $productData[$channel] = $data;
+                }
+            }
+
+            if (!empty($productData)) {
+                $result['products'][$product] = $productData;
             }
         }
 
