@@ -77,86 +77,143 @@ class SnapshotService
     ];
 
     /**
-     * Discover all product names that exist on the FTP.
+     * Cached scan of the entire FTP tree, keyed by product name.
      *
-     * A product is any direct subdirectory of FTP_ROOT that contains at least
-     * one release tag matching one of the channel patterns under
-     * releases/download/.
+     * The product name is derived from the tag itself (the segment before the
+     * version part), not from the containing directory — directory names may
+     * legitimately differ from product names (e.g. directory "xz-embedded/"
+     * holding tag "xzembedded-v1.0.0").
+     *
+     * Shape:
+     *   [
+     *     '<product>' => [
+     *       'directory' => '<dirname>',         // FTP_ROOT subdir holding the releases
+     *       'tags'      => [
+     *         ['tag' => '<tag>', 'channel' => '<chan>', 'sort' => [int, ...]],
+     *         ...
+     *       ],
+     *     ],
+     *     ...
+     *   ]
+     *
+     * @var array<string, array{directory: string, tags: array<int, array{tag: string, channel: string, sort: array<int>}>}>|null
+     */
+    private ?array $scanCache = null;
+
+    /**
+     * Walk every FTP_ROOT subdirectory, examine its releases/download/
+     * children, classify any recognised tag, and group them by product name
+     * (the tag's leading segment). Tags that don't match any channel pattern
+     * (legacy v202604…, vBETA…, vLTS… etc.) are silently skipped.
+     *
+     * If a product appears under multiple directories we keep the first one
+     * encountered (sorted), which is deterministic and good enough.
+     *
+     * @return array<string, array{directory: string, tags: array<int, array{tag: string, channel: string, sort: array<int>}>}>
+     */
+    private function scan(): array
+    {
+        if ($this->scanCache !== null) {
+            return $this->scanCache;
+        }
+
+        $byProduct = [];
+
+        if (!is_dir(self::FTP_ROOT)) {
+            return $this->scanCache = $byProduct;
+        }
+
+        $rootEntries = scandir(self::FTP_ROOT) ?: [];
+        sort($rootEntries);
+
+        foreach ($rootEntries as $dir) {
+            if ($dir === '.' || $dir === '..') {
+                continue;
+            }
+            $downloadDir = self::FTP_ROOT . '/' . $dir . '/releases/download';
+            if (!is_dir($downloadDir)) {
+                continue;
+            }
+
+            $tagEntries = scandir($downloadDir) ?: [];
+            foreach ($tagEntries as $tag) {
+                if ($tag === '.' || $tag === '..') {
+                    continue;
+                }
+                if (!is_dir($downloadDir . '/' . $tag)) {
+                    continue;
+                }
+
+                // Split tag into <product>-<versionPart> at the *last* dash
+                // before a version-looking segment. Simpler: try every dash
+                // boundary from left to right and accept the first split where
+                // the suffix classifies as a channel.
+                $product = null;
+                $classified = null;
+                $offset = 0;
+                while (($dashPos = strpos($tag, '-', $offset)) !== false) {
+                    $candidateProduct = substr($tag, 0, $dashPos);
+                    $candidateVersion = substr($tag, $dashPos + 1);
+                    $maybe = $this->classifyVersionPart($candidateVersion);
+                    if ($maybe !== null && $candidateProduct !== '') {
+                        $product = $candidateProduct;
+                        $classified = $maybe;
+                        break;
+                    }
+                    $offset = $dashPos + 1;
+                }
+
+                if ($product === null || $classified === null) {
+                    // Legacy/unknown tag — skip.
+                    continue;
+                }
+
+                if (!isset($byProduct[$product])) {
+                    $byProduct[$product] = [
+                        'directory' => $dir,
+                        'tags'      => [],
+                    ];
+                }
+
+                $byProduct[$product]['tags'][] = [
+                    'tag'     => $tag,
+                    'channel' => $classified[0],
+                    'sort'    => $classified[1],
+                ];
+            }
+        }
+
+        ksort($byProduct);
+        return $this->scanCache = $byProduct;
+    }
+
+    /**
+     * Discover all product names that have at least one recognised release.
      *
      * @return string[]
      */
     public function discoverProducts(): array
     {
-        if (!is_dir(self::FTP_ROOT)) {
-            return [];
-        }
-
-        $entries = scandir(self::FTP_ROOT) ?: [];
-        $products = [];
-
-        foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-            $path = self::FTP_ROOT . '/' . $entry;
-            if (!is_dir($path)) {
-                continue;
-            }
-            if (!is_dir($path . '/releases/download')) {
-                continue;
-            }
-            // Only register the product if it has at least one tag we recognise.
-            if (!empty($this->listProductTags($entry))) {
-                $products[] = $entry;
-            }
-        }
-
-        sort($products);
-        return $products;
+        return array_keys($this->scan());
     }
 
     /**
-     * List every recognised release tag for a product, classified by channel.
+     * Return the FTP subdirectory that holds the given product's releases,
+     * or null if the product is unknown.
+     */
+    private function productDirectory(string $product): ?string
+    {
+        return $this->scan()[$product]['directory'] ?? null;
+    }
+
+    /**
+     * List recognised release tags for a product.
      *
      * @return array<int, array{tag: string, channel: string, sort: array<int>}>
      */
     private function listProductTags(string $product): array
     {
-        $downloadDir = self::FTP_ROOT . '/' . $product . '/releases/download';
-        if (!is_dir($downloadDir)) {
-            return [];
-        }
-
-        $entries = scandir($downloadDir) ?: [];
-        $prefix = $product . '-';
-        $results = [];
-
-        foreach ($entries as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-            if (!is_dir($downloadDir . '/' . $entry)) {
-                continue;
-            }
-            if (!str_starts_with($entry, $prefix)) {
-                // Legacy global tag (v202604…, vBETA…, vLTS…) — ignore.
-                continue;
-            }
-
-            $versionPart = substr($entry, strlen($prefix));
-            $classified = $this->classifyVersionPart($versionPart);
-            if ($classified === null) {
-                continue;
-            }
-
-            $results[] = [
-                'tag'     => $entry,
-                'channel' => $classified[0],
-                'sort'    => $classified[1],
-            ];
-        }
-
-        return $results;
+        return $this->scan()[$product]['tags'] ?? [];
     }
 
     /**
@@ -243,11 +300,14 @@ class SnapshotService
             }
         }
 
-        $releaseDir = self::FTP_ROOT . '/' . $product . '/releases/download/' . $tag;
-        if (is_dir($releaseDir)) {
-            $mtime = @filemtime($releaseDir);
-            if ($mtime !== false) {
-                return date('Y-m-d', $mtime);
+        $directory = $this->productDirectory($product);
+        if ($directory !== null) {
+            $releaseDir = self::FTP_ROOT . '/' . $directory . '/releases/download/' . $tag;
+            if (is_dir($releaseDir)) {
+                $mtime = @filemtime($releaseDir);
+                if ($mtime !== false) {
+                    return date('Y-m-d', $mtime);
+                }
             }
         }
         return date('Y-m-d');
@@ -271,15 +331,20 @@ class SnapshotService
             return null;
         }
 
-        $releaseDir = self::FTP_ROOT . '/' . $product . '/releases/download/' . $tag;
-        $downloadUrl = self::DOWNLOAD_ROOT_URL . '/' . $product . '/releases/download/' . $tag . '/';
+        $directory = $this->productDirectory($product);
+        if ($directory === null) {
+            return null;
+        }
+
+        $releaseDir  = self::FTP_ROOT . '/' . $directory . '/releases/download/' . $tag;
+        $downloadUrl = self::DOWNLOAD_ROOT_URL . '/' . $directory . '/releases/download/' . $tag . '/';
 
         return [
             'release_tag'  => $tag,
             'version'      => $this->versionFromTag($product, $tag, $channel),
             'release_date' => $this->releaseDateFor($product, $tag, $channel),
             'download_url' => $downloadUrl,
-            'files'        => $this->listReleaseFiles($releaseDir, $product, $tag),
+            'files'        => $this->listReleaseFiles($releaseDir, $directory, $tag),
         ];
     }
 
@@ -328,9 +393,15 @@ class SnapshotService
      * List release files (source archives only, skipping checksums/signatures)
      * for a product release directory.
      *
+     * @param string $directory The FTP_ROOT subdirectory holding the product's
+     *                          releases — note this is the directory name on
+     *                          disk, which may differ from the product name
+     *                          embedded in the tag (e.g. directory
+     *                          "xz-embedded/" vs. tag "xzembedded-v1.0.0").
+     *
      * @return array<array{name: string, url: string, size: int}>
      */
-    private function listReleaseFiles(string $releaseDir, string $product, string $tag): array
+    private function listReleaseFiles(string $releaseDir, string $directory, string $tag): array
     {
         if (!is_dir($releaseDir)) {
             return [];
@@ -359,7 +430,7 @@ class SnapshotService
 
             $files[] = [
                 'name' => $entry,
-                'url'  => self::DOWNLOAD_ROOT_URL . '/' . $product . '/releases/download/' . $tag . '/' . $entry,
+                'url'  => self::DOWNLOAD_ROOT_URL . '/' . $directory . '/releases/download/' . $tag . '/' . $entry,
                 'size' => filesize($filePath) ?: 0,
             ];
         }
