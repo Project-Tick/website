@@ -206,7 +206,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-20T19:15:30+00:00"
+            "time": "2025-08-20T19:15:30+00:00",
+            "published-time": "2025-08-20T19:16:27+00:00"
         },
         {
             "name": "doctrine/collections",
@@ -3944,16 +3945,16 @@
         },
         {
             "name": "symfony/asset-mapper",
-            "version": "v6.4.39",
+            "version": "v6.4.49",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/asset-mapper.git",
-                "reference": "3eb97804859d272d1b859e20e82002c97a79d71d"
+                "reference": "855d6d393e7127f779a03cea5f989934045ecbb3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/asset-mapper/zipball/3eb97804859d272d1b859e20e82002c97a79d71d",
-                "reference": "3eb97804859d272d1b859e20e82002c97a79d71d",
+                "url": "https://api.github.com/repos/symfony/asset-mapper/zipball/855d6d393e7127f779a03cea5f989934045ecbb3",
+                "reference": "855d6d393e7127f779a03cea5f989934045ecbb3",
                 "shasum": ""
             },
             "require": {
@@ -4003,7 +4004,7 @@
             "description": "Maps directories of assets & makes them available in a public directory with versioned filenames.",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/asset-mapper/tree/v6.4.39"
+                "source": "https://github.com/symfony/asset-mapper/tree/v6.4.49"
             },
             "funding": [
                 {
@@ -4023,7 +4024,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-12T10:48:33+00:00"
+            "time": "2026-10-20T13:09:37+00:00",
+            "published-time": "2026-10-28T18:17:22+00:00"
         },
         {
             "name": "symfony/cache",
@@ -4609,7 +4611,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-25T14:21:43+00:00"
+            "time": "2024-09-25T14:21:43+00:00",
+            "published-time": "2025-05-25T20:28:15+00:00"
         },
         {
             "name": "symfony/doctrine-bridge",
@@ -5256,7 +5259,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-18T13:18:21+00:00"
+            "time": "2026-04-18T13:18:21+00:00",
+            "published-time": "2026-05-01T08:00:38+00:00"
         },
         {
             "name": "symfony/finder",
@@ -7276,7 +7280,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T17:25:58+00:00"
+            "time": "2026-04-10T17:25:58+00:00",
+            "published-time": "2026-04-26T14:44:58+00:00"
         },
         {
             "name": "symfony/polyfill-php83",
@@ -12874,5 +12879,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
